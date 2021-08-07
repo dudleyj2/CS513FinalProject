@@ -9,7 +9,7 @@ According to the TomTom Traffic Index Report, traffic across cities worldwide ha
 
 
 ## Identifying a Dataset
-The dataset that has been selected for this project is the [E-Scooter Trips 2020 Pilot Program Dataset](https://data.world/cityofchicago/3rse-fbp6) produced by Data World and the City of Chicago.  For the 2020 Pilot program, the City updated the rules and requirements for e-scooter vendors based on the results of the 2019 data.  
+The dataset, <i>D</i>, that has been selected for this project is the [E-Scooter Trips 2020 Pilot Program Dataset](https://data.world/cityofchicago/3rse-fbp6) produced by Data World and the City of Chicago.  For the 2020 Pilot program, the City updated the rules and requirements for e-scooter vendors based on the results of the 2019 data.  
 
 <p align="center">
  <img src=img/chicago_scooter_zones.png/>
@@ -44,6 +44,11 @@ This raw dataset consists of ~630,000 rows of scooter commuter data in Chicago, 
 |End Centroid Location	|The location of the center of the trip end Community Area. This column will be blank for locations outside Chicago.|Point
 
 <p align="center">
-    <br>
-    <em><b>Table 1:</b> Description of Dataset "<b>D</b>" Columns </em>
+    <em><b>Table 1:</b> Description of Dataset "D" Columns </em>
 </p>
+
+
+## Target Use Cases
+With the success of the 2020 Pilot E-Scooter Program, our goal in mind here is to further legitimize the adoption of shared e-scooters as a means of transportation throughout Chicago.  One way that the city can promote the use of alternative methods of transportation outside of automobiles is to increase the number dedicated bike lanes. Thus, our primary target use case, <i>U<sub>1</sub></i> is to use our data to determine the best placement for future dedicated bike lanes.  In order to get the most accurate locations for our suggested bike lane placements, data cleaning is required.  We want to eliminate certain outliers such as trips with unreasonably long or short durations and unreasonably long or short distances.  Given that our dataset is sufficiently large, we’ll also be removing rows with corrupted or missing data.  More detailed information and the steps for data cleaning are laid out in a later section.
+
+In addition to our primary use case, we have two secondary use cases for our data. <i>U<sub>2</sub></i>, our use case where data cleaning is not necessary, will be to determine which times of the day have the highest earning potential for electric scooters.  The purpose of this is to determine potential surge pricing business models already in place by companies like Lyft and Uber, where the price of the trip is relative to real-time demand. Our other secondary use case, <i>U<sub>3</sub></i>, where data cleaning is not sufficient, will be to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  
