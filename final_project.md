@@ -172,7 +172,7 @@ Initial Raw Data Row Count: 630816.0
 Row Count After Removing NA's: 629175.0
 Total NA Rows Removed: 1641.0
 ```
-Similar to before, we've removed 1,641 rows for having incomplete data and we're now left with 629,175 row.s
+Similar to before, we've removed 1,641 rows for having incomplete data and we're now left with 629,175 rows.
 
 #### Step 3: Remove Unreasonably Long and Short Duration Trips
 This step requires a bit more work than the previous two.  For this step, we're going to take a closer look at the trip duration statistics in order to gain a better idea of an acceptable range of values to use.  We begin by finding the mean and standard deviations for Trip Duration in our working data set:
@@ -202,4 +202,57 @@ We continue can use the data description to determine a more suitable range for 
 # Describe the Data
 print("Data Description")
 print(df["Trip Duration"].describe())
+print(f"\nMedian Trip Length (Seconds): {df['Trip Duration'].median()}")
+print(f"Median Trip Length (Minutes): {df['Trip Duration'].median()/60}")
+```
+```
+Data Description
+count    629175.000000
+mean        993.401151
+std        1352.792422
+min           0.000000
+25%         305.000000
+50%         570.000000
+75%        1125.000000
+max      204182.000000
+Name: Trip Duration, dtype: float64
+
+Median Trip Length (Seconds): 570.0
+Median Trip Length (Minutes): 9.5
+```
+
+You can see above that our median trip length, also our 50th percentile trip length, is 9.5 minutes.  Using this information, we can try to find reasonable high and low percentile trip durations in order to form our range.
+```
+print(f"95th Percentile Duration (Seconds): {duration_95th_percentile}")
+print(f"95th Percentile Duration (Minutes): {duration_95th_percentile/60}")
+```
+```
+5th Percentile Duration (Seconds): 80.0
+5th Percentile Duration (Minutes): 1.3333333333333333
+95th Percentile Duration (Seconds): 3390.0
+95th Percentile Duration (Minutes): 56.5
+```
+This 5th and 95th percentile range falls within original standard deviation range and is sufficient for our use case, so to continue with this step, we will remove the rows from the working data set whose durations are outside of the 80 second to 3390 second time range.
+```
+current_row_total = df.size/total_columns
+print(f"Current Working Row Count: {current_row_total}")
+
+df_duration_5th_percentile = df[df["Trip Duration"] < duration_5th_percentile].index
+df.drop(df_duration_5th_percentile, inplace=True)
+short_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Short Durations: {short_trip_row_total}")
+print(f"Total Short Duration Rows Removed: {current_row_total - short_trip_row_total}")
+
+df_duration_95th_percentile = df[df["Trip Duration"] > duration_95th_percentile].index
+df.drop(df_duration_95th_percentile, inplace=True)
+long_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Long Durations: {long_trip_row_total}")
+print(f"Total Long Duration Rows Removed: {current_row_total - long_trip_row_total}")
+```
+```
+Current Working Row Count: 629175.0
+Rows After Removing Short Durations: 598044.0
+Total Short Duration Rows Removed: 31131.0
+Rows After Removing Long Durations: 566588.0
+Total Long Duration Rows Removed: 62587.0
 ```

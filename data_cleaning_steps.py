@@ -18,6 +18,7 @@ print(f"Row Count After Removing NA's: {na_row_total}")
 print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
 
 
+print(f'\n\n\n')
 
 
 # Find Trip Duration Mean
@@ -33,9 +34,48 @@ print('Standard Deviation Range = +/-2 St. Dev. from Mean')
 print(f'Standard Deviation Range = [{trip_duration_mean - 2*trip_duration_std}, {trip_duration_mean + 2*trip_duration_std}]')
 
 
+print(f'\n\n\n')
 
 
 
+# Describe the Data
+print("Data Description")
+print(df["Trip Duration"].describe())
+print(f"\nMedian Trip Length (Seconds): {df['Trip Duration'].median()}")
+print(f"Median Trip Length (Minutes): {df['Trip Duration'].median()/60}")
+
+print(f'\n\n\n')
+
+
+
+duration_5th_percentile = np.percentile(df["Trip Duration"], 5)
+duration_95th_percentile = np.percentile(df["Trip Duration"], 95)
+print(f"5th Percentile Duration (Seconds): {duration_5th_percentile}")
+print(f"5th Percentile Duration (Minutes): {duration_5th_percentile/60}")
+
+print(f"95th Percentile Duration (Seconds): {duration_95th_percentile}")
+print(f"95th Percentile Duration (Minutes): {duration_95th_percentile/60}")
+
+print(f'\n\n\n')
+
+current_row_total = df.size/total_columns
+print(f"Current Working Row Count: {current_row_total}")
+
+df_duration_5th_percentile = df[df["Trip Duration"] < duration_5th_percentile].index
+df.drop(df_duration_5th_percentile, inplace=True)
+short_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Short Durations: {short_trip_row_total}")
+print(f"Total Short Duration Rows Removed: {current_row_total - short_trip_row_total}")
+
+df_duration_95th_percentile = df[df["Trip Duration"] > duration_95th_percentile].index
+df.drop(df_duration_95th_percentile, inplace=True)
+long_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Long Durations: {long_trip_row_total}")
+print(f"Total Long Duration Rows Removed: {current_row_total - long_trip_row_total}")
+
+
+
+# Remove Rows < 5th Percentile Duration
 
 
 """
@@ -76,11 +116,11 @@ print(f"95th Percentile Duration (Minutes): {duration_95th_percentile/60}")
 # Both are within out SD range, but excessively long trips are not influencing our dataset
 df_duration_5th_percentile = df[df["Trip Duration"] < duration_5th_percentile].index
 df.drop(df_duration_5th_percentile, inplace=True)
-print(f"Rows after removing short trips: {df.size/16}")
+print(f"Rows after removing short trips: {df.size/total_columns}")
 
 df_duration_95th_percentile = df[df["Trip Duration"] > duration_95th_percentile].index
 df.drop(df_duration_95th_percentile, inplace=True)
-print(f"Rows after removing long trips: {df.size/16}")
+print(f"Rows after removing long trips: {df.size/total_columns}")
 # Remove Rows < 5th Percentile Duration
 
 print("\n\n\n")
