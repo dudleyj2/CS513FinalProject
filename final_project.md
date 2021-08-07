@@ -18,5 +18,11 @@ The dataset that has been selected for this project is the [E-Scooter Trips 2020
     </p>
 </p>
 
+<p align="center">
+ <img src=img/chicago_scooter_zones.png/>
+    <br>
+    <em><b>Image 1:</b> Map of Chicago E-Scooter Operation Zones</em>
+</p>
+
 
 As seen in Image 1 above, the scooters were limited allowed to operate citywide with a handful of exceptions.  Shared electric scooters were prohibited from the Lakefront Trail, Central Business District, and 606 Trail.  Additionally, vendors were limited to 3,333 scooters, had to deploy 50% to the Equity Priority Area shown in Image 1, and scooters could not be ridden on. Sidewalks between 5am and 10pm.  Lastly, riders were required to lock their scooters to a fixed object to end their trip to eliminate the sidewalk clutter and clear pathways for other pedestrians.
