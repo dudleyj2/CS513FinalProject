@@ -114,3 +114,14 @@ As seen in the code output above, we have a wide range of distances and duration
 Looking at the trip distance statistices, the maximum trip distance, is almost 50,000 feet, or nearly 10 miles. It's also over 13 times the 75th percentile distance of just 3,641 feet, or 0.69 miles. Comparatively, the minimum distance is just 1 foot - much too small to be a legitimate commute.
 
 Needless to say, there are plenty of rows with outlier data that we should remove in order to create <i>D'</i>, our cleaned data set.
+
+
+## Data Cleaning
+The data cleaning process can be broken down into the following steps:
+> Step 1: Import Raw Data
+> Step 2: Remove NA Value Columns
+> Step 3: Remove Unreasonably Long and Short Duration Trips
+> Step 4: Remove Unreasonably Long and Short Distance Trips
+> Step 5: Convert Date Datatypes
+
+
