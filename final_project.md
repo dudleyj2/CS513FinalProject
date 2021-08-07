@@ -56,6 +56,7 @@ In addition to our primary use case, we have two secondary use cases for our dat
 
 ## Raw Dataset Analysis
 Before we begin our data cleaning steps, we’re going to need to take a closer look at the data itself.  In order to do so, we’re going to use the [Pandas]( https://pandas.pydata.org/docs/) and [NumPy](https://numpy.org/doc/) Python libraries.
+Input
 ```
 import numpy as np
 import pandas as pd
@@ -76,6 +77,7 @@ print(f"Initial Raw Data Row Count: {raw_row_total}")
 print(f"Row Count After Removing NA's: {na_row_total}")
 print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
 ```
+Output
 ```
 Total Dataset Columns: 16
 Initial Raw Data Row Count: 630816.0
