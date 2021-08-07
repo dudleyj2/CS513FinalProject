@@ -1,0 +1,1 @@
+The workflow model for this project is referenced in the data cleaning narrative and available in img/flow1.png
