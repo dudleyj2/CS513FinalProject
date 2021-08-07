@@ -36,10 +36,10 @@ This raw dataset consists of ~630,000 rows of scooter commuter data in Chicago, 
 |End Community Area Number	|The Community Area number where the trip ended.|Number
 |Start Community Area Name	|The Community Area name where the trip started.|Plain Text
 |End Community Area Name	|The Community Area name where the trip ended.|Plain Text
-|Start Centroid Latitude	|The latitude of the center of the trip start Community Area. This |column will be blank for locations outside Chicago.|Number
+|Start Centroid Latitude	|The latitude of the center of the trip start Community Area. This column will be blank for locations outside Chicago.|Number
 |Start Centroid Longitude	|The longitude of the center of the trip start Community Area. This column will be blank for locations outside Chicago.|Number
 |Start Centroid Location	|The location of the center of the trip start Community Area. This column will be blank for locations outside Chicago.|Point
-|End Centroid Latitude	|The latitude of the center of the trip end Community Area. This |column will be blank for locations outside Chicago.|Number
+|End Centroid Latitude	|The latitude of the center of the trip end Community Area. This column will be blank for locations outside Chicago.|Number
 |End Centroid Longitude	|The longitude of the center of the trip end Community Area. This column will be blank for locations outside Chicago.|Number
 |End Centroid Location	|The location of the center of the trip end Community Area. This column will be blank for locations outside Chicago.|Point
 
