@@ -526,9 +526,9 @@ Hour 23: 31.0
 Copying and pasting these values into excel, we're able to create Figure 1, which helps to visualize scooter demand each hour.
 
 <p align="center">
- <img src=img/chart.png/>
+ <img src=img/chart1.png/>
     <br>
-    <em><b>Figure 1:</b> Scooter Trips by Hour Start and End</em>
+    <em><b>Figure 1:</b> Scooter Trips by Hour Start and End (Cleaned Data)</em>
 </p>
 
 As you can see in Figure 1, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM. Because the peaks are so similar, we'll use the Start Time values for creating our heat maps in Step 3.
@@ -618,3 +618,158 @@ The final step in finding our optimal bike lane locations is to reference our he
     <em><b>Image 7:</b> High Traffic Electric Scooter Areas at 17:00 Hours</em>
 </p>
 
+Shown in Image 7, the three areas with the most electric scooter demand are circled and labelled as A, B, and C.  These neighborhoods are Lakeview, Bronzeville, and Chatham/Avalon Park, respectively.  After cleaning and analysis, I would recommend that the city of Chicago prioritize these neighborhoods for new dedicated bike lines.
+
+
+## Secondary Use Case: U<sub>2</sub>
+Our secondary use case, <i>U<sub>2</sub></i>, was to determine which times of the day have the highest demand and therefore earning potential for electric scooters.  This use case is one where data cleaning is not necessary, and it's purpose would be to find the optimal times for these vendors to use surge pricing in order to increase profits.
+
+We already did this work earlier as a step for our primary use case, but I'm going to demonstrate that for this standalone secondary use case, cleaning isn't necessary.
+
+Similar to before, we'll load the data and partition it by the hour.  This time around, however, we will load the raw data and will not be eliminating any rows beforehand.
+```
+import pandas as pd
+
+df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
+total_columns = len(df.columns)
+
+# Separate DF by Start Time Hour
+print(f"Calculating Start Times")
+hour_starts = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_start = [df[df["Start Time"].str.contains(hour)] for hour in hour_starts]
+
+print(f"Sample of Entries with Start Time at 12AM:")
+print(dfs_by_hour_start[0]["Start Time"].head())
+
+print(f"Sample of Entries with STart Time at 4:00PM")
+print(dfs_by_hour_start[16]["Start Time"].head())
+
+
+# Separate DF by End Time Hour
+print(f"\n\nCalculating End Times")
+hour_ends = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_end = [df[df["End Time"].str.contains(hour)] for hour in hour_ends]
+
+print(f"Sample of Entries with End Time at 12AM:")
+print(dfs_by_hour_end[0]["End Time"].head())
+
+print(f"Sample of Entries with End Time at 4:00PM")
+print(dfs_by_hour_end[16]["End Time"].head())
+
+
+# Get Total Rows/Hour
+trips_per_hour_start = [hour.size/total_columns for hour in dfs_by_hour_start]
+
+# Get Total Rows/Hour
+trips_per_hour_end = [hour.size/total_columns for hour in dfs_by_hour_end]
+
+print(f'\n\nTrips per Hour Start: ')
+for i in range(len(trips_per_hour_start)):
+    print(f'Hour {i}: {trips_per_hour_start[i]}')
+
+print(f'\n\nTrips per Hour End: ')
+for i in range(len(trips_per_hour_end)):
+    print(f'Hour {i}: {trips_per_hour_end[i]}')
+```
+```
+Calculating Start Times
+Sample of Entries with Start Time at 12AM:
+82416     8/25/20 0:00
+82417     8/25/20 0:00
+138078    8/31/20 0:00
+145639     9/1/20 0:00
+145640     9/1/20 0:00
+Name: Start Time, dtype: object
+Sample of Entries with STart Time at 4:00PM
+1144    8/12/20 16:00
+1145    8/12/20 16:00
+1146    8/12/20 16:00
+1147    8/12/20 16:00
+1148    8/12/20 16:00
+Name: Start Time, dtype: object
+
+
+Calculating End Times
+Sample of Entries with End Time at 12AM:
+3454     8/13/20 0:00
+38412    8/19/20 0:00
+44489    8/20/20 0:00
+44500    8/20/20 0:00
+44501    8/20/20 0:00
+Name: End Time, dtype: object
+Sample of Entries with End Time at 4:00PM
+587    8/12/20 16:00
+631    8/12/20 16:00
+649    8/12/20 16:00
+763    8/12/20 16:00
+765    8/12/20 16:00
+Name: End Time, dtype: object
+
+
+Trips per Hour Start: 
+Hour 0: 17.0
+Hour 1: 12.0
+Hour 2: 7.0
+Hour 3: 39.0
+Hour 4: 21.0
+Hour 5: 3201.0
+Hour 6: 6271.0
+Hour 7: 10153.0
+Hour 8: 14597.0
+Hour 9: 17649.0
+Hour 10: 23626.0
+Hour 11: 31971.0
+Hour 12: 39673.0
+Hour 13: 43585.0
+Hour 14: 48099.0
+Hour 15: 55324.0
+Hour 16: 61115.0
+Hour 17: 67605.0
+Hour 18: 67568.0
+Hour 19: 58006.0
+Hour 20: 45999.0
+Hour 21: 35939.0
+Hour 22: 299.0
+Hour 23: 40.0
+
+
+Trips per Hour End: 
+Hour 0:  152.0
+Hour 1:  12.0
+Hour 2:  14.0
+Hour 3:  29.0
+Hour 4:  23.0
+Hour 5:  2564.0
+Hour 6:  5653.0
+Hour 7:  9511.0
+Hour 8:  13726.0
+Hour 9:  16522.0
+Hour 10: 21971.0
+Hour 11: 29433.0
+Hour 12: 37920.0
+Hour 13: 42075.0
+Hour 14: 46062.0
+Hour 15: 53006.0
+Hour 16: 58919.0
+Hour 17: 66280.0
+Hour 18: 67786.0
+Hour 19: 60527.0
+Hour 20: 48916.0
+Hour 21: 39224.0
+Hour 22: 9728.0
+Hour 23: 763.0
+```
+Once again, we create a chart of these values.
+
+<p align="center">
+ <img src=img/chart2.png/>
+    <br>
+    <em><b>Figure 2:</b> Scooter Trips by Hour Start and End (Raw Data)</em>
+</p>
+
+
+
+
+
+
+In addition to our primary use case, we have two secondary use cases for our data. <i>U<sub>2</sub></i>, our use case where data cleaning is not necessary, will be to determine which times of the day have the highest earning potential for electric scooters.  The purpose of this is to determine potential surge pricing business models already in place by companies like Lyft and Uber, where the price of the trip is relative to real-time demand. Our other secondary use case, <i>U<sub>3</sub></i>, where data cleaning is not sufficient, will be to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  
