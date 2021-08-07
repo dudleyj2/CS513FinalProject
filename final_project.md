@@ -767,9 +767,53 @@ Once again, we create a chart of these values.
     <em><b>Figure 2:</b> Scooter Trips by Hour Start and End (Raw Data)</em>
 </p>
 
+And, once again, we see in Figure 2 that the most popular hours to ride a scooter are between 16:00 and 19:00, just as it was before the data cleaning step.  Vendors should therefore considering increasing their prices during these hours if they would like to maximize their profits.
+While data cleaning was not necessary here, it's still always a very important step when trying to produce accurate results.  
+
+## Secondary Use Case: U<sub>3</sub>
+Our next secondary use case, <i>U<sub>3</sub></i>, where data cleaning id not sufficient, is to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  The reason that data cleaning is insufficient for our target use case here is because the data is lacking certain required information.  We do not know how many times these scooters were prepared, how much each ride cost, or how many scooters were stolen/missing at the end of the pilot program.  With that being said, we can still use our clean data set, D', and some outside information to attempt to come up an answer.
+
+The first step is to determine what the price model is for each of the three companies in the 2020 pilot program: Bird, Lime, and Spin.  In Chicago, Bird, Lime, and Spin are all currently charging $1.00 to unlock the scooter and $0.39/minute of riding + tax.  The next step is to determine how much a scooter costs to produce.  We can use this [scooter](https://www.walmart.com/ip/Bird-ES4-800-Electric-Scooter-Dual-Battery-28-mile-Range-800-Watt-Motor-Ground-Effect-Lights-Front-Shock-Absorption-15-5-MPH-Ultra-Lightweight-Scoote/820461710?wmlspartner=wlpa&selectedSellerId=101015394&&adid=22222222227387731326&wl0=&wl1=g&wl2=c&wl3=513758874174&wl4=pla-1015545166774&wl5=9028771&wl6=&wl7=&wl8=&wl9=pla&wl10=157246008&wl11=online&wl12=820461710&veh=sem&gclid=EAIaIQobChMIkKyT3P-f8gIVNhmtBh3qjAZFEAQYAyABEgJULvD_BwE&gclsrc=aw.ds) from Walmart, priced at $449, as a conservatively high estimate for this cost.  Lastly, we need to keep in mind how much these vendors need to pay third party workers to charge their scooters.  This price comes out to ~$5/day.
+
+Once again, we load our cleaned data to determine and find the median time for each ride.
+```
+import pandas as pd
+
+df = pd.read_csv("~/Desktop/output.csv")
+total_columns = len(df.columns)
+
+print(f"\nMedian Trip Length (Seconds): {df['Trip Duration'].median()}")
+print(f"Median Trip Length (Minutes): {df['Trip Duration'].median()/60}")
+```
+```
+Median Trip Length (Seconds): 549.0
+Median Trip Length (Minutes): 9.15
+```
+Our median trip duration is 9.15 minutes.  Using the startup cost of $449, our median duration of 9.15 minutes, and the pricing model of $1 to unlock + $0.39/minute, and assuming that each scooter is used just 10 times a day, we can use the following formula to determine (roughly) how many trips each scooter needs:
+```
+scooter_price = 449
+median_minutes = df['Trip Duration'].median()/60
+
+remaining_investment = scooter_price
+
+total_trips_until_profit = 0
+times_used_daily = 0
+while remaining_investment > 0:
+    total_trips_until_profit += 1
+    if times_used_daily % 10 == 0:
+        remaining_investment += 5
+    remaining_investment -=  (1 + 0.39*median_minutes)
+    times_used_daily += 1
+
+print(f"Total Trips Until Profit: {total_trips_until_profit}")
+```
+```
+Total Trips Until Profit: 112
+```
+Thus, we can roughly estimate with our limited data and outside sources that it will take 112 trips for Bird, Lime, and Spin to profit off of each scooter in Chicago.  Once again, we're missing important data related to administrative and overhead cost, taxes owed to the city, lobbying costs to allow the use of scooters on public spaces, etc.
+
+Our answer to this use case is nowhere close to complete without knowing the additional costs or varying price models from subscription services for these scooters.  Therefore, even with the data that we have, we will never be able to tell how many trips each scooter needs to take to turn a profit with this data alone.
 
 
-
-
-
-In addition to our primary use case, we have two secondary use cases for our data. <i>U<sub>2</sub></i>, our use case where data cleaning is not necessary, will be to determine which times of the day have the highest earning potential for electric scooters.  The purpose of this is to determine potential surge pricing business models already in place by companies like Lyft and Uber, where the price of the trip is relative to real-time demand. Our other secondary use case, <i>U<sub>3</sub></i>, where data cleaning is not sufficient, will be to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  
+## Conclusion
+In conclusion, as a result of the data cleaning and analysis of the 2020 E-Scooter Pilot Program in Chicago, Illinois, I would recommend that future dedicated bike lane infrastructure projects be priorized in the Lakeview, Bronzeville, and Chatham/Avalon Park neighborhoods to better suit the needs of the Chicagoans living there.
