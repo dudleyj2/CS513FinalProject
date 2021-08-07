@@ -591,3 +591,18 @@ The resulting heatmaps are nearly identical and shown below.
     <br>
     <em><b>Image 5:</b> Heat Map of Scooters with Start Time == 19:00 Hours</em>
 </p>
+
+Included as a reference is the heatmap for 4:00AM
+```
+df_4 = df[df['Start Time'].str.contains(' 4:00')]
+my_heatmap_4 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_4 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_4.iterrows()]
+HeatMap(heat_data_start_4, blur=30, radiues=10).add_to(my_heatmap_4)
+my_heatmap_4.save("400.html")
+```
+
+<p align="center">
+ <img src=img/1600.png/>
+    <br>
+    <em><b>Image 6:</b> Heat Map of Scooters with Start Time == 04:00 Hours</em>
+</p>
