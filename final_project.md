@@ -531,5 +531,63 @@ Copying and pasting these values into excel, we're able to create Figure 1, whic
     <em><b>Figure 1:</b> Scooter Trips by Hour Start and End</em>
 </p>
 
-As you can see in Figure 1, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM.
+As you can see in Figure 1, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM. Because the peaks are so similar, we'll use the Start Time values for creating our heat maps in Step 3.
 We can also see in this chart that the early and late hours in the day have very few entries in comparison to the peak times.  This is because the scooters are charged every night and less people are out.
+
+
+#### Step 3: Create Heat Maps of Scooter Trip Locations at High Demand Times
+Our next step is to make heatmaps for the high demand times that the scooters are in use.  We'll do this using the folium library, which was imported in Step 1.  These heatmaps will be exported as html files.
+
+```
+# Make Heat Maps
+df_16 = df[df['Start Time'].str.contains('16:00')]
+df_17 = df[df['Start Time'].str.contains('17:00')]
+df_18 = df[df['Start Time'].str.contains('18:00')]
+df_19 = df[df['Start Time'].str.contains('19:00')]
+
+
+my_heatmap_16 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_16 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_16.iterrows()]
+HeatMap(heat_data_start_16, blur=30, radiues=10).add_to(my_heatmap_16)
+my_heatmap_16.save("1600.html")
+
+my_heatmap_17 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_17 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_17.iterrows()]
+HeatMap(heat_data_start_17, blur=30, radiues=10).add_to(my_heatmap_17)
+my_heatmap_17.save("1700.html")
+
+my_heatmap_18 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_18 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_18.iterrows()]
+HeatMap(heat_data_start_18, blur=30, radiues=10).add_to(my_heatmap_18)
+my_heatmap_18.save("1800.html")
+
+my_heatmap_19 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_19 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_19.iterrows()]
+HeatMap(heat_data_start_19, blur=30, radiues=10).add_to(my_heatmap_19)
+my_heatmap_19.save("1900.jpg")
+```
+The resulting heatmaps are nearly identical and shown below.
+
+<p align="center">
+ <img src=img/1600.png/>
+    <br>
+    <em><b>Image 2:</b> Heat Map of Scooters with Start Time == 16:00 Hours</em>
+</p>
+
+<p align="center">
+ <img src=img/1600.png/>
+    <br>
+    <em><b>Image 3:</b> Heat Map of Scooters with Start Time == 17:00 Hours</em>
+</p>
+
+<p align="center">
+ <img src=img/1600.png/>
+    <br>
+    <em><b>Image 4:</b> Heat Map of Scooters with Start Time == 18:00 Hours</em>
+</p>
+
+<p align="center">
+ <img src=img/1600.png/>
+    <br>
+    <em><b>Image 5:</b> Heat Map of Scooters with Start Time == 19:00 Hours</em>
+</p>
