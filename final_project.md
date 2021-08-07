@@ -12,13 +12,6 @@ According to the TomTom Traffic Index Report, traffic across cities worldwide ha
 The dataset that has been selected for this project is the [E-Scooter Trips 2020 Pilot Program Dataset](https://data.world/cityofchicago/3rse-fbp6) produced by Data World and the City of Chicago.  For the 2020 Pilot program, the City updated the rules and requirements for e-scooter vendors based on the results of the 2019 data.  
 
 <p align="center">
-    <img src=img/chicago_scooter_zones.png>
-    <p style="text-align: center;">
-    Image 1: Map of Chicago E-Scooter Operation Zones
-    </p>
-</p>
-
-<p align="center">
  <img src=img/chicago_scooter_zones.png/>
     <br>
     <em><b>Image 1:</b> Map of Chicago E-Scooter Operation Zones</em>
@@ -26,3 +19,31 @@ The dataset that has been selected for this project is the [E-Scooter Trips 2020
 
 
 As seen in Image 1 above, the scooters were limited allowed to operate citywide with a handful of exceptions.  Shared electric scooters were prohibited from the Lakefront Trail, Central Business District, and 606 Trail.  Additionally, vendors were limited to 3,333 scooters, had to deploy 50% to the Equity Priority Area shown in Image 1, and scooters could not be ridden on. Sidewalks between 5am and 10pm.  Lastly, riders were required to lock their scooters to a fixed object to end their trip to eliminate the sidewalk clutter and clear pathways for other pedestrians.
+
+This raw dataset consists of ~630,000 rows of scooter commuter data in Chicago, Illinois, from August to December of 2020.  Each row contains 16 columns.  Table 1 below contains each of those columns and their datatypes.
+
+
+
+|Column Name	| Description	| Type
+|---|---|---|
+|Trip ID	|A unique ID for each trip.|Plain Text
+|Start Time	|When the trip started, rounded to the nearest hour.|Date & Time
+|End Time	|When the trip ended, rounded to the nearest hour.|Date & Time
+|Trip Distance	|Trip distance in meters. (Divide by 1609 for miles.)|Number
+|Trip Duration	|Trip time in seconds.|Number
+|Vendor	|The vendor of the scooter|Plain Text
+|Start Community Area Number	|The Community Area number where the trip started.|Number
+|End Community Area Number	|The Community Area number where the trip ended.|Number
+|Start Community Area Name	|The Community Area name where the trip started.|Plain Text
+|End Community Area Name	|The Community Area name where the trip ended.|Plain Text
+|Start Centroid Latitude	|The latitude of the center of the trip start Community Area. This |column will be blank for locations outside Chicago.|Number
+|Start Centroid Longitude	|The longitude of the center of the trip start Community Area. This column will be blank for locations outside Chicago.|Number
+|Start Centroid Location	|The location of the center of the trip start Community Area. This column will be blank for locations outside Chicago.|Point
+|End Centroid Latitude	|The latitude of the center of the trip end Community Area. This |column will be blank for locations outside Chicago.|Number
+|End Centroid Longitude	|The longitude of the center of the trip end Community Area. This column will be blank for locations outside Chicago.|Number
+|End Centroid Location	|The location of the center of the trip end Community Area. This column will be blank for locations outside Chicago.|Point
+
+<p align="center">
+    <br>
+    <em><b>Table 1:</b> Description of Dataset "<b>D</b>" Columns </em>
+</p>
