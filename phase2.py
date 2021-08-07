@@ -8,7 +8,10 @@ import seaborn as sns
 import numpy as np
 
 df = pd.read_csv('~/Downloads/e-scooter-trips-2020-1.csv')
-print(f"Initial Data Rows: {df.size/16}")
+total_columns = len(df.columns)
+print(f'Total Dataset Columns: {total_columns}')
+print(f"Initial Data Rows: {df.size/total_columns}")
+
 
 
 # Remove Rows from Table with NA Values

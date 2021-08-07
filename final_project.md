@@ -60,18 +60,24 @@ Before we begin our data cleaning steps, we’re going to need to take a closer 
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv('~/Downloads/e-scooter-trips-2020-1.csv')
-raw_row_total = df.size/16
+df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
+# Get Total Number of Columns
+total_columns = len(df.columns)
+print(f"Total Dataset Columns: {total_columns}")
+
+# Get Raw Row Total
+raw_row_total = df.size/total_columns
 
 # Remove Rows from Table with NA Values
 df.dropna(inplace=True)
-na_row_total = df.size/16
+na_row_total = df.size/total_columns
 
 print(f"Initial Raw Data Row Count: {raw_row_total}")
 print(f"Row Count After Removing NA's: {na_row_total}")
 print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
 ```
 ```
+Total Dataset Columns: 16
 Initial Raw Data Row Count: 630816.0
 Row Count After Removing NA's: 629175.0
 Total NA Rows Removed: 1641.0
@@ -79,11 +85,11 @@ Total NA Rows Removed: 1641.0
 Right off the bat, we're removing 1,641 rows from our dataset.  Now that these rows have been removed, let's peek at some important fields of the data to get an idea of important statistical values associated with them, like mean, median, and percentile ranges.
 
 ```
-print(f'\nTrip Duration Statistics (Seconds)')
-print(df['Trip Duration'].describe())
+print(f"\nTrip Duration Statistics (Seconds)")
+print(df["Trip Duration"].describe())
 
-print(f'\nTrip Distance Statistics (Feet)')
-print(df['Trip Distance'].describe())
+print(f"\nTrip Distance Statistics (Feet)")
+print(df["Trip Distance"].describe())
 ```
 ```
 Trip Duration Statistics (Seconds)
@@ -119,9 +125,81 @@ Needless to say, there are plenty of rows with outlier data that we should remov
 ## Data Cleaning
 The data cleaning process can be broken down into the following steps:
 > Step 1: Import Raw Data
+>
 > Step 2: Remove NA Value Columns
+>
 > Step 3: Remove Unreasonably Long and Short Duration Trips
+>
 > Step 4: Remove Unreasonably Long and Short Distance Trips
+>
 > Step 5: Convert Date Datatypes
+> 
+> Step 6: Export D' for U1
 
+Each of these steps are important to complete in order for us to achieve accurate results for our primary use case, <i>U<sub>1</sub></i>.
 
+#### Step 1: Import Raw Data
+To do our data cleaning, I've chosen to use the Pandas and NumPy libraries in Python.  The first step, importing our data for cleaning, can be done with a few simple lines of code:
+
+```
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
+```
+
+#### Step 2: Remove NA Value Columns
+Our second step is also just a few lines of code:
+```
+# Get Total Number of Columns
+total_columns = len(df.columns)
+print(f"Total Dataset Columns: {total_columns}")
+
+# Get Raw Row Total
+raw_row_total = df.size/total_columns
+
+# Remove Rows from Table with NA Values
+df.dropna(inplace=True)
+na_row_total = df.size/total_columns
+
+print(f"Initial Raw Data Row Count: {raw_row_total}")
+print(f"Row Count After Removing NA's: {na_row_total}")
+print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
+```
+```
+Total Dataset Columns: 16
+Initial Raw Data Row Count: 630816.0
+Row Count After Removing NA's: 629175.0
+Total NA Rows Removed: 1641.0
+```
+Similar to before, we've removed 1,641 rows for having incomplete data and we're now left with 629,175 row.s
+
+#### Step 3: Remove Unreasonably Long and Short Duration Trips
+This step requires a bit more work than the previous two.  For this step, we're going to take a closer look at the trip duration statistics in order to gain a better idea of an acceptable range of values to use.  We begin by finding the mean and standard deviations for Trip Duration in our working data set:
+```
+# Find Trip Duration Mean
+trip_duration_mean = df['Trip Duration'].mean()
+print(f'Trip Duration Mean: {trip_duration_mean}')
+
+# Find Trip Duration Standard Deviation
+trip_duration_std = df['Trip Duration'].std()
+print(f'Trip Duration Standard Deviation: {trip_duration_std}')
+
+# Find +/- 2 SD from Mean
+print('Standard Deviation Range = +/-2 St. Dev. from Mean')
+print(f'Standard Deviation Range = [{trip_duration_mean - 2*trip_duration_std}, {trip_duration_mean + 2*trip_duration_std}]')
+```
+```
+Trip Duration Mean: 993.4011507132356
+Trip Duration Standard Deviation: 1352.7924216882725
+Standard Deviation Range = +/-2 St. Dev. from Mean
+Standard Deviation Range = [-1712.1836926633096, 3698.9859940897804]
+```
+As you can see in the output shown above, the distribution of our dataset is not well suited to use a duration range that is within two standard deviation of the mean.  This is due to the nature of the time data - trips can be an absolute minimum of 0 seconds but have a theoretically infinite maximum.  Thus, using a range of values that dips so far below our minimum is not suitable for our use case.
+
+We continue can use the data description to determine a more suitable range for acceptable trip durations:
+```
+# Describe the Data
+print("Data Description")
+print(df["Trip Duration"].describe())
+```
