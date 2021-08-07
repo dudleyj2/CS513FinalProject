@@ -49,6 +49,62 @@ This raw dataset consists of ~630,000 rows of scooter commuter data in Chicago, 
 
 
 ## Target Use Cases
-With the success of the 2020 Pilot E-Scooter Program, our goal in mind here is to further legitimize the adoption of shared e-scooters as a means of transportation throughout Chicago.  One way that the city can promote the use of alternative methods of transportation outside of automobiles is to increase the number dedicated bike lanes. Thus, our primary target use case, <i>U<sub>1</sub></i> is to use our data to determine the best placement for future dedicated bike lanes.  In order to get the most accurate locations for our suggested bike lane placements, data cleaning is required.  We want to eliminate certain outliers such as trips with unreasonably long or short durations and unreasonably long or short distances.  Given that our dataset is sufficiently large, we’ll also be removing rows with corrupted or missing data.  More detailed information and the steps for data cleaning are laid out in a later section.
+With the success of the 2020 Pilot E-Scooter Program, our goal in mind here is to further legitimize the adoption of shared e-scooters as a means of transportation throughout Chicago.  One way that the city can promote the use of alternative methods of transportation outside of automobiles is to increase the number dedicated bike lanes. Thus, our primary target use case, <i>U<sub>1</sub></i>, is to use our data to determine the best placement for future dedicated bike lanes.  In order to get the most accurate locations for our suggested bike lane placements, data cleaning is required.  We want to eliminate certain outliers such as trips with unreasonably long or short durations and unreasonably long or short distances.  Given that our dataset is sufficiently large, we’ll also be removing rows with corrupted or missing data.  More detailed information and the steps for data cleaning are laid out in a later section.
 
 In addition to our primary use case, we have two secondary use cases for our data. <i>U<sub>2</sub></i>, our use case where data cleaning is not necessary, will be to determine which times of the day have the highest earning potential for electric scooters.  The purpose of this is to determine potential surge pricing business models already in place by companies like Lyft and Uber, where the price of the trip is relative to real-time demand. Our other secondary use case, <i>U<sub>3</sub></i>, where data cleaning is not sufficient, will be to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  
+
+
+## Raw Dataset Analysis
+Before we begin our data cleaning steps, we’re going to need to take a closer look at the data itself.  In order to do so, we’re going to use the [Pandas]( https://pandas.pydata.org/docs/) and [NumPy](https://numpy.org/doc/) Python libraries.
+```
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv('~/Downloads/e-scooter-trips-2020-1.csv')
+raw_row_total = df.size/16
+
+# Remove Rows from Table with NA Values
+df.dropna(inplace=True)
+na_row_total = df.size/16
+
+print(f"Initial Raw Data Row Count: {raw_row_total}")
+print(f"Row Count After Removing NA's: {na_row_total}")
+print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
+```
+```
+Initial Raw Data Row Count: 630816.0
+Row Count After Removing NA's: 629175.0
+Total NA Rows Removed: 1641.0
+```
+Right off the bat, we're removing 1,641 rows from our dataset.  Now that these rows have been removed, let's peek at some important fields of the data to get an idea of important statistical values associated with them, like mean, median, and percentile ranges.
+
+```
+print(f'\nTrip Duration Statistics')
+print(df['Trip Duration'].describe())
+
+print(f'\nTrip Distance Statistics')
+print(df['Trip Distance'].describe())
+```
+```
+Trip Duration Statistics
+count    629175.000000
+mean        993.401151
+std        1352.792422
+min           0.000000
+25%         305.000000
+50%         570.000000
+75%        1125.000000
+max      204182.000000
+Name: Trip Duration, dtype: float64
+
+Trip Distance Statistics
+count    629175.000000
+mean       2905.926094
+std        3707.496669
+min           1.000000
+25%         822.000000
+50%        1868.000000
+75%        3641.000000
+max       49997.000000
+Name: Trip Distance, dtype: float64
+```
