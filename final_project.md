@@ -368,7 +368,7 @@ Once again, our target use case is to determine optimal locations for new bike l
 > 
 > Step 3: Create Heat Maps of Scooter Trip Locations at High Demand Times
 >
-> Step 4: Overlay Heat Map with Current Bike Map to Determine New Bike Lane Locations
+> Step 4: Use Heat Maps to Determine New Bike Lane Locations
 
 #### Step 1: Import Cleaned Dataset D' and Required Libraries
 As with before, this step is fairly straightforward.  We simply import the clean data set that was exported in our earlier data cleaning process and the new required libraries. 
@@ -606,3 +606,15 @@ my_heatmap_4.save("400.html")
     <br>
     <em><b>Image 6:</b> Heat Map of Scooters with Start Time == 04:00 Hours</em>
 </p>
+
+Our work here is now complete and we can move on to the next step.
+
+#### Step 4: Use Heat Maps to Determine New Bike Lane Locations
+The final step in finding our optimal bike lane locations is to reference our heat maps from the busiest hour times.  Since each of the four busiest hour times had such similar results, we'll arbitrarily select the heatmap from 17:00.
+
+<p align="center">
+ <img src=img/heat_map_sections.png/>
+    <br>
+    <em><b>Image 7:</b> High Traffic Electric Scooter Areas at 17:00 Hours</em>
+</p>
+
