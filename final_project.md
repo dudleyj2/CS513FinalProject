@@ -361,4 +361,24 @@ df.to_csv('~/Desktop/output.csv', index=False, header=True)
 
 
 ## Target Use Case: U<sub>1</sub>
+Once again, our target use case is to determine optimal locations for new bike lanes in Chicago with the intention of promoting reducing vehicle traffic by making alternative means of transportation more available.  The steps to do this are listed below:
+> Step 1: Import Cleaned Dataset D' and Required Libraries
+>
+> Step 2: Discover High Demand Scooter Times
+> 
+> Step 3: Create Heat Maps of Scooter Trip Locations at High Demand Times
+>
+> Step 4: Overlay Heat Map with Current Bike Map to Determine New Bike Lane Locations
 
+#### Step 1: Import Cleaned Dataset D' and Required Libraries
+As with before, this step is fairly straightforward.  We simply import the clean data set that was exported in our earlier data cleaning process and the new required libraries. 
+```
+import folium
+from folium import plugins
+from folium.plugins import HeatMap
+
+import pandas as pd
+
+df = pd.read_csv('~/Desktop/output.csv')
+```
+Here, we're importing the [Folium](http://python-visualization.github.io/folium/) library to generate our heatmaps later on.
