@@ -575,19 +575,19 @@ The resulting heatmaps are nearly identical and shown below.
 </p>
 
 <p align="center">
- <img src=img/1600.png/>
+ <img src=img/1700.png/>
     <br>
     <em><b>Image 3:</b> Heat Map of Scooters with Start Time == 17:00 Hours</em>
 </p>
 
 <p align="center">
- <img src=img/1600.png/>
+ <img src=img/1800.png/>
     <br>
     <em><b>Image 4:</b> Heat Map of Scooters with Start Time == 18:00 Hours</em>
 </p>
 
 <p align="center">
- <img src=img/1600.png/>
+ <img src=img/1900.png/>
     <br>
     <em><b>Image 5:</b> Heat Map of Scooters with Start Time == 19:00 Hours</em>
 </p>
@@ -602,7 +602,7 @@ my_heatmap_4.save("400.html")
 ```
 
 <p align="center">
- <img src=img/1600.png/>
+ <img src=img/400.png/>
     <br>
     <em><b>Image 6:</b> Heat Map of Scooters with Start Time == 04:00 Hours</em>
 </p>
