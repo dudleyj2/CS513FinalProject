@@ -56,7 +56,7 @@ In addition to our primary use case, we have two secondary use cases for our dat
 
 ## Raw Dataset Analysis
 Before we begin our data cleaning steps, we’re going to need to take a closer look at the data itself.  In order to do so, we’re going to use the [Pandas]( https://pandas.pydata.org/docs/) and [NumPy](https://numpy.org/doc/) Python libraries.
-Input
+
 ```
 import numpy as np
 import pandas as pd
@@ -77,7 +77,6 @@ print(f"Initial Raw Data Row Count: {raw_row_total}")
 print(f"Row Count After Removing NA's: {na_row_total}")
 print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
 ```
-Output
 ```
 Total Dataset Columns: 16
 Initial Raw Data Row Count: 630816.0
@@ -258,3 +257,83 @@ Total Short Duration Rows Removed: 31131.0
 Rows After Removing Long Durations: 566588.0
 Total Long Duration Rows Removed: 62587.0
 ```
+After all of that, we've removed another 93,000 rows and we're left with 566,588.
+
+
+#### Step 4: Remove Unreasonably Long and Short Distance Trips
+We continue the work to remove outliers by looking at the data in the Trip Distance columns.  Similarly to before, we explore the mean, standard deviation, and other statistics to help determine the best cutoff points for our acceptable trip distance range.
+```
+# Find Trip Distance Mean
+trip_distance_mean = df["Trip Distance"].mean()
+print(f"Trip Distance Mean (Feet): {trip_distance_mean}")
+
+# Find Trip Distance Standard Deviation
+trip_distance_std = df["Trip Distance"].std()
+print(f"Trip Distance Standard Deviation (Feet): {trip_distance_std}")
+
+# Find +/- 2 SD from Mean
+print("Standard Deviation Range (Feet) = +/-2 St. Dev. from Mean")
+print(f"Standard Deviation Range (Feet) = [{trip_distance_mean - 2*trip_distance_std}, {trip_distance_mean + 2*trip_distance_std}]")
+
+# Learn here that Mean and Standard Deviation might not be the best approach
+# Do a Describe on the Data
+print("Data Description")
+print(df["Trip Distance"].describe())
+
+# Median here is a much better fit
+print(f"Median Trip Distance (Feet): {df['Trip Distance'].median()}")
+print(f"Median Trip Distance (Miles): {df['Trip Distance'].median()/5280}")
+```
+```
+Trip Distance Mean (Feet): 2680.593380022168
+Trip Distance Standard Deviation (Feet): 2978.9245690711678
+Standard Deviation Range (Feet) = +/-2 St. Dev. from Mean
+Standard Deviation Range (Feet) = [-3277.2557581201677, 8638.442518164504]
+Data Description
+count    566588.000000
+mean       2680.593380
+std        2978.924569
+min           1.000000
+25%         939.000000
+50%        1902.000000
+75%        3500.000000
+max       49997.000000
+Name: Trip Distance, dtype: float64
+Median Trip Distance (Feet): 1902.0
+Median Trip Distance (Miles): 0.36022727272727273
+```
+Once again, we find ourselves with an inopportune standard deviation range.  In this case, we can't travel negative distances, and our maximum distance of nearly 50,000 feet, or 9.5 miles, is far greater than the median distance to travel with a scooter 0.36 miles.
+As we did before with duration values, we'll find an appropriate percentile range for our data and remove rows that are not in that range.
+```
+# Get 10th and 90th Percentile Values
+distance_10th_percentile = np.percentile(df["Trip Distance"], 10)
+distance_90th_percentile = np.percentile(df["Trip Distance"], 90)
+print(f"10th Percentile Distance (Feet): {distance_10th_percentile}")
+print(f"10th Percentile Distance (Miles): {distance_10th_percentile/5280}")
+
+
+current_row_total = df.size/total_columns
+print(f"Current Working Row Count: {current_row_total}")
+
+df_distance_10th_percentile = df[df["Trip Distance"] < distance_10th_percentile].index
+df.drop(df_distance_10th_percentile, inplace=True)
+short_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Short Distances: {short_trip_row_total}")
+print(f"Total Short Distance Rows Removed: {current_row_total - short_trip_row_total}")
+
+df_distance_90th_percentile = df[df["Trip Distance"] > distance_90th_percentile].index
+df.drop(df_distance_90th_percentile, inplace=True)
+long_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Long Distances: {long_trip_row_total}")
+print(f"Total Long Distance Rows Removed: {current_row_total - long_trip_row_total}")
+```
+```
+10th Percentile Distance (Feet): 210.0
+10th Percentile Distance (Miles): 0.03977272727272727
+Current Working Row Count: 566588.0
+Rows After Removing Short Distances: 509980.0
+Total Short Distance Rows Removed: 56608.0
+Rows After Removing Long Distances: 453333.0
+Total Long Distance Rows Removed: 113255.0
+```
+Finally, we're now left with 453,333 rows, all of which have complete data and have data within our acceptable ranges for Trip Duration and Trip Distance.
