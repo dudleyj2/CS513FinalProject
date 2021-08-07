@@ -144,7 +144,7 @@ Each of these steps are important to complete in order for us to achieve accurat
 #### Step 1: Review for Data Quality Problems
 The first step of our data cleaning is to review for obvious data quality problems so that they can be addressed before we begin our work towards our target use case, <i>U<sub>1</sub></i>.  After a visual inspection, it was found that the data is actually fairly clean.  Almost all of the rows include each of the fields listed int he description of the data.  An obvious problem for <i>U<sub>1</sub></i> is that we have not been provided with exact routes for the trips, so we will have to keep that in mind when mapping high scooter traffic areas. Another data quality problem that we cannot work around is that we've been limited to data that was obtained during the Covid-19 pandemic.  This means that there are less work commuters and people in general using the scooters throughout the day, so we have less data to work with.  Additionally, the Start Time and End Time columns are rounded to the nearest hour, so we don't have exact information on when the trips start and end.  With all of this in mind, we can solve some of these issues in the next steps of our data cleaning process.
 
-#### Step 1: Import Raw Data
+#### Step 2: Import Raw Data
 To do our data cleaning, I've chosen to use the Pandas and NumPy libraries in Python.  The first step, importing our data for cleaning, can be done with a few simple lines of code:
 
 ```
@@ -154,7 +154,7 @@ import pandas as pd
 df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
 ```
 
-#### Step 2: Remove NA Value Columns
+#### Step 3: Remove NA Value Columns
 Our second step is also just a few lines of code:
 ```
 # Get Total Number of Columns
@@ -180,7 +180,7 @@ Total NA Rows Removed: 1641.0
 ```
 Similar to before, we've removed 1,641 rows for having incomplete data and we're now left with 629,175 rows.
 
-#### Step 3: Remove Unreasonably Long and Short Duration Trips
+#### Step 4: Remove Unreasonably Long and Short Duration Trips
 This step requires a bit more work than the previous two.  For this step, we're going to take a closer look at the trip duration statistics in order to gain a better idea of an acceptable range of values to use.  We begin by finding the mean and standard deviations for Trip Duration in our working data set:
 ```
 # Find Trip Duration Mean
@@ -265,7 +265,7 @@ Total Long Duration Rows Removed: 62587.0
 After all of that, we've removed another 93,000 rows and we're left with 566,588.
 
 
-#### Step 4: Remove Unreasonably Long and Short Distance Trips
+#### Step 5: Remove Unreasonably Long and Short Distance Trips
 We continue the work to remove outliers by looking at the data in the Trip Distance columns.  Similarly to before, we explore the mean, standard deviation, and other statistics to help determine the best cutoff points for our acceptable trip distance range.
 ```
 # Find Trip Distance Mean
@@ -344,7 +344,7 @@ Total Long Distance Rows Removed: 113255.0
 Finally, we're now left with 453,333 rows, all of which have complete data and have data within our acceptable ranges for Trip Duration and Trip Distance.
 
 
-#### Step 5: Convert Date Datatypes
+#### Step 6: Convert Date Datatypes
 Our next step is to convert our Date entry data types to something more usable.  The Start Time and End Time values in the working dataset are in plain text/string format.  We need to convert these to a more standardized date format so that they can be used for analysis.  Luckily, this is takes only a few lines of code with our chosen libraries.
 ```
 # Convert Data Types
@@ -353,10 +353,12 @@ df['End Time'].apply(pd.to_datetime)
 ```
 Converting these datetimes allows us to use these converted values later on for our use cases.
 
-#### Step 6: Export D' for U1
+#### Step 7: Export D' for U1
 Now that our dataset is cleaned, we can export it.  This speeds up our work later on, as the data conversion in Step 5 is time consuming and we would like to avoid repeating it.
 ```
 df.to_csv('~/Desktop/output.csv', index=False, header=True)
 ```
 
+
+## Target Use Case: U<sub>1</sub>
 
