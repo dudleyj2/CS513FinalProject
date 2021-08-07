@@ -380,5 +380,153 @@ from folium.plugins import HeatMap
 import pandas as pd
 
 df = pd.read_csv('~/Desktop/output.csv')
+total_columns = len(df.columns)
 ```
 Here, we're importing the [Folium](http://python-visualization.github.io/folium/) library to generate our heatmaps later on.
+
+
+#### Step 2: Discover High Demand Scooter Times
+The first thing that we'll do here is take our dataset D' and partition it twice.  The first partition, dfs_by_hour_start will partition the data based on the start time of the trip, and the second, dfs_by_hour_end, will partition the data based on the end time of the trip.
+```
+# Separate DF by Start Time Hour
+print(f"Calculating Start Times")
+hour_starts = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_start = [df[df["Start Time"].str.contains(hour)] for hour in hour_starts]
+
+print(f"Sample of Entries with Start Time at 12AM:")
+print(dfs_by_hour_start[0]["Start Time"].head())
+
+print(f"Sample of Entries with STart Time at 4:00PM")
+print(dfs_by_hour_start[16]["Start Time"].head())
+
+
+# Separate DF by End Time Hour
+print(f"\n\nCalculating End Times")
+hour_ends = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_end = [df[df["End Time"].str.contains(hour)] for hour in hour_ends]
+
+print(f"Sample of Entries with End Time at 12AM:")
+print(dfs_by_hour_end[0]["End Time"].head())
+
+print(f"Sample of Entries with End Time at 4:00PM")
+print(dfs_by_hour_end[16]["End Time"].head())
+```
+```
+Calculating Start Times
+Sample of Entries with Start Time at 12AM:
+50794    8/25/20 0:00
+50795    8/25/20 0:00
+88803    8/31/20 0:00
+93988     9/1/20 0:00
+93989     9/1/20 0:00
+Name: Start Time, dtype: object
+Sample of Entries with STart Time at 4:00PM
+661    8/12/20 16:00
+662    8/12/20 16:00
+663    8/12/20 16:00
+664    8/12/20 16:00
+665    8/12/20 16:00
+Name: Start Time, dtype: object
+
+
+Calculating End Times
+Sample of Entries with End Time at 12AM:
+50794    8/25/20 0:00
+50795    8/25/20 0:00
+88803    8/31/20 0:00
+93987     9/1/20 0:00
+93988     9/1/20 0:00
+Name: End Time, dtype: object
+Sample of Entries with End Time at 4:00PM
+555    8/12/20 16:00
+581    8/12/20 16:00
+584    8/12/20 16:00
+591    8/12/20 16:00
+598    8/12/20 16:00
+Name: End Time, dtype: object
+```
+
+Now, we'll take these partitioned dataframes to determine how many entries there are per hour.
+```
+# Get Total Rows/Hour
+trips_per_hour_start = [hour.size/total_columns for hour in dfs_by_hour_start]
+
+print(f'Calculating End Times')
+dfs_by_hour_end = [df[df['End Time'].str.contains(hour)] for hour in hour_starts]
+
+for hour in dfs_by_hour_end:
+    print(hour['End Time'].head())
+
+# Get Total Rows/Hour
+trips_per_hour_end = [hour.size/total_columns for hour in dfs_by_hour_end]
+
+print(f'Trips per Hour Start: ')
+for i in range(len(trips_per_hour_start)):
+    print(f'Hour {i}: {trips_per_hour_start[i]}')
+
+print(f'\n\nTrips per Hour End: ')
+for i in range(len(trips_per_hour_end)):
+    print(f'Hour {i}: {trips_per_hour_end[i]}')
+```
+```
+Trips per Hour Start: 
+Hour 0: 14.0
+Hour 1: 8.0
+Hour 2: 1.0
+Hour 3: 18.0
+Hour 4: 9.0
+Hour 5: 2420.0
+Hour 6: 4851.0
+Hour 7: 7977.0
+Hour 8: 11478.0
+Hour 9: 13552.0
+Hour 10: 17965.0
+Hour 11: 24095.0
+Hour 12: 29691.0
+Hour 13: 31807.0
+Hour 14: 34327.0
+Hour 15: 39004.0
+Hour 16: 42860.0
+Hour 17: 47896.0
+Hour 18: 47740.0
+Hour 19: 40485.0
+Hour 20: 31848.0
+Hour 21: 25075.0
+Hour 22: 185.0
+Hour 23: 27.0
+
+
+Trips per Hour End: 
+Hour 0: 17.0
+Hour 1: 7.0
+Hour 2: 2.0
+Hour 3: 18.0
+Hour 4: 7.0
+Hour 5: 2032.0
+Hour 6: 4369.0
+Hour 7: 7576.0
+Hour 8: 10861.0
+Hour 9: 12914.0
+Hour 10: 17024.0
+Hour 11: 22649.0
+Hour 12: 28858.0
+Hour 13: 31328.0
+Hour 14: 33446.0
+Hour 15: 38092.0
+Hour 16: 41945.0
+Hour 17: 47139.0
+Hour 18: 48060.0
+Hour 19: 42213.0
+Hour 20: 33211.0
+Hour 21: 26438.0
+Hour 22: 5096.0
+Hour 23: 31.0
+```
+
+Copying and pasting these values into excel, we're able to create Figure 1, which helps to visualize scooter demand each hour.
+
+<p align="center">
+ <img src=img/chart.png/>
+    <br>
+    <em><b>Figure 1:</b> Scooter Trips by Hour Start and End</em>
+</p>

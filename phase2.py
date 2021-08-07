@@ -13,10 +13,9 @@ print(f'Total Dataset Columns: {total_columns}')
 print(f"Initial Data Rows: {df.size/total_columns}")
 
 
-
 # Remove Rows from Table with NA Values
 df.dropna(inplace=True)
-print(f"Rows after removing NA's: {df.size/16}")
+print(f"Rows after removing NA's: {df.size/total_columns}")
 
 
 # Find Trip Duration Mean
@@ -54,11 +53,11 @@ print(f"95th Percentile Duration (Minutes): {duration_95th_percentile/60}")
 # Both are within out SD range, but excessively long trips are not influencing our dataset
 df_duration_5th_percentile = df[df['Trip Duration'] < duration_5th_percentile].index
 df.drop(df_duration_5th_percentile, inplace=True)
-print(f"Rows after removing short trips: {df.size/16}")
+print(f"Rows after removing short trips: {df.size/total_columns}")
 
 df_duration_95th_percentile = df[df['Trip Duration'] > duration_95th_percentile].index
 df.drop(df_duration_95th_percentile, inplace=True)
-print(f"Rows after removing long trips: {df.size/16}")
+print(f"Rows after removing long trips: {df.size/total_columns}")
 # Remove Rows < 5th Percentile Duration
 
 print('\n\n\n')
@@ -110,11 +109,11 @@ print(f'this one is more realistic, so lets go with that')
 
 df_distance_10th_percentile = df[df['Trip Distance'] < distance_10th_percentile].index
 df.drop(df_distance_10th_percentile, inplace=True)
-print(f"Rows after removing short trips: {df.size/16}")
+print(f"Rows after removing short trips: {df.size/total_columns}")
 
 df_distance_90th_percentile = df[df['Trip Distance'] > distance_90th_percentile].index
 df.drop(df_distance_90th_percentile, inplace=True)
-print(f"Rows after removing long trips: {df.size/16}")
+print(f"Rows after removing long trips: {df.size/total_columns}")
 # Remove Rows < 5th Percentile Distance
 
 """
@@ -138,7 +137,7 @@ for hour in dfs_by_hour_start:
     print(hour['Start Time'].head())
 
 # Get Total Rows/Hour
-trips_per_hour_start = [hour.size/16 for hour in dfs_by_hour_start]
+trips_per_hour_start = [hour.size/total_columns for hour in dfs_by_hour_start]
 
 print(f'Calculating End Times')
 dfs_by_hour_end = [df[df['End Time'].str.contains(hour)] for hour in hour_starts]
@@ -147,12 +146,12 @@ for hour in dfs_by_hour_end:
     print(hour['End Time'].head())
 
 # Get Total Rows/Hour
-trips_per_hour_end = [hour.size/16 for hour in dfs_by_hour_end]
+trips_per_hour_end = [hour.size/total_columns for hour in dfs_by_hour_end]
 
 # Put into Chart for Visual
 print(f'Trips per Hour Start: ')
 for start_time in trips_per_hour_start:
-    print(f' * {start_time}')
+    print(f'{start_time}')
 
 print(f'\nTrips per Hour End: ')
 for end_time in trips_per_hour_end:
