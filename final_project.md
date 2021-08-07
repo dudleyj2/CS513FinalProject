@@ -125,19 +125,24 @@ Needless to say, there are plenty of rows with outlier data that we should remov
 
 ## Data Cleaning
 The data cleaning process can be broken down into the following steps:
-> Step 1: Import Raw Data
+> Step 1: Review for Data Quality Problems
 >
-> Step 2: Remove NA Value Columns
+> Step 2: Import Raw Data
 >
-> Step 3: Remove Unreasonably Long and Short Duration Trips
+> Step 3: Remove NA Value Columns
 >
-> Step 4: Remove Unreasonably Long and Short Distance Trips
+> Step 4: Remove Unreasonably Long and Short Duration Trips
 >
-> Step 5: Convert Date Datatypes
+> Step 5: Remove Unreasonably Long and Short Distance Trips
+>
+> Step 6: Convert Date Datatypes
 > 
-> Step 6: Export D' for U1
+> Step 7: Export D' for U1
 
 Each of these steps are important to complete in order for us to achieve accurate results for our primary use case, <i>U<sub>1</sub></i>.
+
+#### Step 1: Review for Data Quality Problems
+The first step of our data cleaning is to review for obvious data quality problems so that they can be addressed before we begin our work towards our target use case, <i>U<sub>1</sub></i>.  After a visual inspection, it was found that the data is actually fairly clean.  Almost all of the rows include each of the fields listed int he description of the data.  An obvious problem for <i>U<sub>1</sub></i> is that we have not been provided with exact routes for the trips, so we will have to keep that in mind when mapping high scooter traffic areas. Another data quality problem that we cannot work around is that we've been limited to data that was obtained during the Covid-19 pandemic.  This means that there are less work commuters and people in general using the scooters throughout the day, so we have less data to work with.  Additionally, the Start Time and End Time columns are rounded to the nearest hour, so we don't have exact information on when the trips start and end.  With all of this in mind, we can solve some of these issues in the next steps of our data cleaning process.
 
 #### Step 1: Import Raw Data
 To do our data cleaning, I've chosen to use the Pandas and NumPy libraries in Python.  The first step, importing our data for cleaning, can be done with a few simple lines of code:
@@ -353,3 +358,5 @@ Now that our dataset is cleaned, we can export it.  This speeds up our work late
 ```
 df.to_csv('~/Desktop/output.csv', index=False, header=True)
 ```
+
+
