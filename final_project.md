@@ -359,6 +359,14 @@ Now that our dataset is cleaned, we can export it.  This speeds up our work late
 df.to_csv('~/Desktop/output.csv', index=False, header=True)
 ```
 
+Below is a workflow diagram to illustrate the process that was just performed to clean the data.
+
+<p align="center">
+ <img src=img/flow1.png/>
+    <br>
+    <em><b>Figure 1:</b> Workflow Diagram of Data Cleaning</em>
+</p>
+
 
 ## Target Use Case: U<sub>1</sub>
 Once again, our target use case is to determine optimal locations for new bike lanes in Chicago with the intention of promoting reducing vehicle traffic by making alternative means of transportation more available.  The steps to do this are listed below:
@@ -523,15 +531,15 @@ Hour 22: 5096.0
 Hour 23: 31.0
 ```
 
-Copying and pasting these values into excel, we're able to create Figure 1, which helps to visualize scooter demand each hour.
+Copying and pasting these values into excel, we're able to create Figure 2, which helps to visualize scooter demand each hour.
 
 <p align="center">
  <img src=img/chart1.png/>
     <br>
-    <em><b>Figure 1:</b> Scooter Trips by Hour Start and End (Cleaned Data)</em>
+    <em><b>Figure 2:</b> Scooter Trips by Hour Start and End (Cleaned Data)</em>
 </p>
 
-As you can see in Figure 1, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM. Because the peaks are so similar, we'll use the Start Time values for creating our heat maps in Step 3.
+As you can see in Figure 2, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM. Because the peaks are so similar, we'll use the Start Time values for creating our heat maps in Step 3.
 We can also see in this chart that the early and late hours in the day have very few entries in comparison to the peak times.  This is because the scooters are charged every night and less people are out.
 
 
@@ -764,10 +772,10 @@ Once again, we create a chart of these values.
 <p align="center">
  <img src=img/chart2.png/>
     <br>
-    <em><b>Figure 2:</b> Scooter Trips by Hour Start and End (Raw Data)</em>
+    <em><b>Figure 3:</b> Scooter Trips by Hour Start and End (Raw Data)</em>
 </p>
 
-And, once again, we see in Figure 2 that the most popular hours to ride a scooter are between 16:00 and 19:00, just as it was before the data cleaning step.  Vendors should therefore considering increasing their prices during these hours if they would like to maximize their profits.
+And, once again, we see in Figure 3 that the most popular hours to ride a scooter are between 16:00 and 19:00, just as it was before the data cleaning step.  Vendors should therefore considering increasing their prices during these hours if they would like to maximize their profits.
 While data cleaning was not necessary here, it's still always a very important step when trying to produce accurate results.  
 
 ## Secondary Use Case: U<sub>3</sub>
