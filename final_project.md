@@ -49,6 +49,779 @@ This raw dataset consists of ~630,000 rows of scooter commuter data in Chicago, 
 
 
 ## Target Use Cases
-With the success of the 2020 Pilot E-Scooter Program, our goal in mind here is to further legitimize the adoption of shared e-scooters as a means of transportation throughout Chicago.  One way that the city can promote the use of alternative methods of transportation outside of automobiles is to increase the number dedicated bike lanes. Thus, our primary target use case, <i>U<sub>1</sub></i> is to use our data to determine the best placement for future dedicated bike lanes.  In order to get the most accurate locations for our suggested bike lane placements, data cleaning is required.  We want to eliminate certain outliers such as trips with unreasonably long or short durations and unreasonably long or short distances.  Given that our dataset is sufficiently large, we’ll also be removing rows with corrupted or missing data.  More detailed information and the steps for data cleaning are laid out in a later section.
+With the success of the 2020 Pilot E-Scooter Program, our goal in mind here is to further legitimize the adoption of shared e-scooters as a means of transportation throughout Chicago.  One way that the city can promote the use of alternative methods of transportation outside of automobiles is to increase the number dedicated bike lanes. Thus, our primary target use case, <i>U<sub>1</sub></i>, is to use our data to determine the best placement for future dedicated bike lanes.  In order to get the most accurate locations for our suggested bike lane placements, data cleaning is required.  We want to eliminate certain outliers such as trips with unreasonably long or short durations and unreasonably long or short distances.  Given that our dataset is sufficiently large, we’ll also be removing rows with corrupted or missing data.  More detailed information and the steps for data cleaning are laid out in a later section.
 
 In addition to our primary use case, we have two secondary use cases for our data. <i>U<sub>2</sub></i>, our use case where data cleaning is not necessary, will be to determine which times of the day have the highest earning potential for electric scooters.  The purpose of this is to determine potential surge pricing business models already in place by companies like Lyft and Uber, where the price of the trip is relative to real-time demand. Our other secondary use case, <i>U<sub>3</sub></i>, where data cleaning is not sufficient, will be to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  
+
+
+## Raw Dataset Analysis
+Before we begin our data cleaning steps, we’re going to need to take a closer look at the data itself.  In order to do so, we’re going to use the [Pandas]( https://pandas.pydata.org/docs/) and [NumPy](https://numpy.org/doc/) Python libraries.
+
+```
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
+# Get Total Number of Columns
+total_columns = len(df.columns)
+print(f"Total Dataset Columns: {total_columns}")
+
+# Get Raw Row Total
+raw_row_total = df.size/total_columns
+
+# Remove Rows from Table with NA Values
+df.dropna(inplace=True)
+na_row_total = df.size/total_columns
+
+print(f"Initial Raw Data Row Count: {raw_row_total}")
+print(f"Row Count After Removing NA's: {na_row_total}")
+print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
+```
+```
+Total Dataset Columns: 16
+Initial Raw Data Row Count: 630816.0
+Row Count After Removing NA's: 629175.0
+Total NA Rows Removed: 1641.0
+```
+Right off the bat, we're removing 1,641 rows from our dataset.  Now that these rows have been removed, let's peek at some important fields of the data to get an idea of important statistical values associated with them, like mean, median, and percentile ranges.
+
+```
+print(f"\nTrip Duration Statistics (Seconds)")
+print(df["Trip Duration"].describe())
+
+print(f"\nTrip Distance Statistics (Feet)")
+print(df["Trip Distance"].describe())
+```
+```
+Trip Duration Statistics (Seconds)
+count    629175.000000
+mean        993.401151
+std        1352.792422
+min           0.000000
+25%         305.000000
+50%         570.000000
+75%        1125.000000
+max      204182.000000
+Name: Trip Duration, dtype: float64
+
+Trip Distance Statistics (Feet)
+count    629175.000000
+mean       2905.926094
+std        3707.496669
+min           1.000000
+25%         822.000000
+50%        1868.000000
+75%        3641.000000
+max       49997.000000
+Name: Trip Distance, dtype: float64
+```
+
+As seen in the code output above, we have a wide range of distances and durations, some of which are unreasonable to include in our analysis.  The maximum trip duration, for example, is over 204,000 seconds, or 56 hours and 40 minutes.  This, and an assortment of other entries in our data set are likely due to user error, where the scooter rider forgot to lock the scooter and end their trip.  The minimum duration of 0 seconds isn't long enough to move at all.
+
+Looking at the trip distance statistices, the maximum trip distance, is almost 50,000 feet, or nearly 10 miles. It's also over 13 times the 75th percentile distance of just 3,641 feet, or 0.69 miles. Comparatively, the minimum distance is just 1 foot - much too small to be a legitimate commute.
+
+Needless to say, there are plenty of rows with outlier data that we should remove in order to create <i>D'</i>, our cleaned data set.
+
+
+## Data Cleaning
+The data cleaning process can be broken down into the following steps:
+> Step 1: Review for Data Quality Problems
+>
+> Step 2: Import Raw Data
+>
+> Step 3: Remove NA Value Columns
+>
+> Step 4: Remove Unreasonably Long and Short Duration Trips
+>
+> Step 5: Remove Unreasonably Long and Short Distance Trips
+>
+> Step 6: Convert Date Datatypes
+> 
+> Step 7: Export D' for U1
+
+Each of these steps are important to complete in order for us to achieve accurate results for our primary use case, <i>U<sub>1</sub></i>.
+
+#### Step 1: Review for Data Quality Problems
+The first step of our data cleaning is to review for obvious data quality problems so that they can be addressed before we begin our work towards our target use case, <i>U<sub>1</sub></i>.  After a visual inspection, it was found that the data is actually fairly clean.  Almost all of the rows include each of the fields listed int he description of the data.  An obvious problem for <i>U<sub>1</sub></i> is that we have not been provided with exact routes for the trips, so we will have to keep that in mind when mapping high scooter traffic areas. Another data quality problem that we cannot work around is that we've been limited to data that was obtained during the Covid-19 pandemic.  This means that there are less work commuters and people in general using the scooters throughout the day, so we have less data to work with.  Additionally, the Start Time and End Time columns are rounded to the nearest hour, so we don't have exact information on when the trips start and end.  With all of this in mind, we can solve some of these issues in the next steps of our data cleaning process.
+
+#### Step 2: Import Raw Data
+To do our data cleaning, I've chosen to use the Pandas and NumPy libraries in Python.  The first step, importing our data for cleaning, can be done with a few simple lines of code:
+
+```
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
+```
+
+#### Step 3: Remove NA Value Columns
+Our second step is also just a few lines of code:
+```
+# Get Total Number of Columns
+total_columns = len(df.columns)
+print(f"Total Dataset Columns: {total_columns}")
+
+# Get Raw Row Total
+raw_row_total = df.size/total_columns
+
+# Remove Rows from Table with NA Values
+df.dropna(inplace=True)
+na_row_total = df.size/total_columns
+
+print(f"Initial Raw Data Row Count: {raw_row_total}")
+print(f"Row Count After Removing NA's: {na_row_total}")
+print(f"Total NA Rows Removed: {raw_row_total - na_row_total}")
+```
+```
+Total Dataset Columns: 16
+Initial Raw Data Row Count: 630816.0
+Row Count After Removing NA's: 629175.0
+Total NA Rows Removed: 1641.0
+```
+Similar to before, we've removed 1,641 rows for having incomplete data and we're now left with 629,175 rows.
+
+#### Step 4: Remove Unreasonably Long and Short Duration Trips
+This step requires a bit more work than the previous two.  For this step, we're going to take a closer look at the trip duration statistics in order to gain a better idea of an acceptable range of values to use.  We begin by finding the mean and standard deviations for Trip Duration in our working data set:
+```
+# Find Trip Duration Mean
+trip_duration_mean = df['Trip Duration'].mean()
+print(f'Trip Duration Mean: {trip_duration_mean}')
+
+# Find Trip Duration Standard Deviation
+trip_duration_std = df['Trip Duration'].std()
+print(f'Trip Duration Standard Deviation: {trip_duration_std}')
+
+# Find +/- 2 SD from Mean
+print('Standard Deviation Range = +/-2 St. Dev. from Mean')
+print(f'Standard Deviation Range = [{trip_duration_mean - 2*trip_duration_std}, {trip_duration_mean + 2*trip_duration_std}]')
+```
+```
+Trip Duration Mean: 993.4011507132356
+Trip Duration Standard Deviation: 1352.7924216882725
+Standard Deviation Range = +/-2 St. Dev. from Mean
+Standard Deviation Range = [-1712.1836926633096, 3698.9859940897804]
+```
+As you can see in the output shown above, the distribution of our dataset is not well suited to use a duration range that is within two standard deviation of the mean.  This is due to the nature of the time data - trips can be an absolute minimum of 0 seconds but have a theoretically infinite maximum.  Thus, using a range of values that dips so far below our minimum is not suitable for our use case.
+
+We continue can use the data description to determine a more suitable range for acceptable trip durations:
+```
+# Describe the Data
+print("Data Description")
+print(df["Trip Duration"].describe())
+print(f"\nMedian Trip Length (Seconds): {df['Trip Duration'].median()}")
+print(f"Median Trip Length (Minutes): {df['Trip Duration'].median()/60}")
+```
+```
+Data Description
+count    629175.000000
+mean        993.401151
+std        1352.792422
+min           0.000000
+25%         305.000000
+50%         570.000000
+75%        1125.000000
+max      204182.000000
+Name: Trip Duration, dtype: float64
+
+Median Trip Length (Seconds): 570.0
+Median Trip Length (Minutes): 9.5
+```
+
+You can see above that our median trip length, also our 50th percentile trip length, is 9.5 minutes.  Using this information, we can try to find reasonable high and low percentile trip durations in order to form our range.
+```
+print(f"95th Percentile Duration (Seconds): {duration_95th_percentile}")
+print(f"95th Percentile Duration (Minutes): {duration_95th_percentile/60}")
+```
+```
+5th Percentile Duration (Seconds): 80.0
+5th Percentile Duration (Minutes): 1.3333333333333333
+95th Percentile Duration (Seconds): 3390.0
+95th Percentile Duration (Minutes): 56.5
+```
+This 5th and 95th percentile range falls within original standard deviation range and is sufficient for our use case, so to continue with this step, we will remove the rows from the working data set whose durations are outside of the 80 second to 3390 second time range.
+```
+current_row_total = df.size/total_columns
+print(f"Current Working Row Count: {current_row_total}")
+
+df_duration_5th_percentile = df[df["Trip Duration"] < duration_5th_percentile].index
+df.drop(df_duration_5th_percentile, inplace=True)
+short_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Short Durations: {short_trip_row_total}")
+print(f"Total Short Duration Rows Removed: {current_row_total - short_trip_row_total}")
+
+df_duration_95th_percentile = df[df["Trip Duration"] > duration_95th_percentile].index
+df.drop(df_duration_95th_percentile, inplace=True)
+long_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Long Durations: {long_trip_row_total}")
+print(f"Total Long Duration Rows Removed: {current_row_total - long_trip_row_total}")
+```
+```
+Current Working Row Count: 629175.0
+Rows After Removing Short Durations: 598044.0
+Total Short Duration Rows Removed: 31131.0
+Rows After Removing Long Durations: 566588.0
+Total Long Duration Rows Removed: 62587.0
+```
+After all of that, we've removed another 93,000 rows and we're left with 566,588.
+
+
+#### Step 5: Remove Unreasonably Long and Short Distance Trips
+We continue the work to remove outliers by looking at the data in the Trip Distance columns.  Similarly to before, we explore the mean, standard deviation, and other statistics to help determine the best cutoff points for our acceptable trip distance range.
+```
+# Find Trip Distance Mean
+trip_distance_mean = df["Trip Distance"].mean()
+print(f"Trip Distance Mean (Feet): {trip_distance_mean}")
+
+# Find Trip Distance Standard Deviation
+trip_distance_std = df["Trip Distance"].std()
+print(f"Trip Distance Standard Deviation (Feet): {trip_distance_std}")
+
+# Find +/- 2 SD from Mean
+print("Standard Deviation Range (Feet) = +/-2 St. Dev. from Mean")
+print(f"Standard Deviation Range (Feet) = [{trip_distance_mean - 2*trip_distance_std}, {trip_distance_mean + 2*trip_distance_std}]")
+
+# Learn here that Mean and Standard Deviation might not be the best approach
+# Do a Describe on the Data
+print("Data Description")
+print(df["Trip Distance"].describe())
+
+# Median here is a much better fit
+print(f"Median Trip Distance (Feet): {df['Trip Distance'].median()}")
+print(f"Median Trip Distance (Miles): {df['Trip Distance'].median()/5280}")
+```
+```
+Trip Distance Mean (Feet): 2680.593380022168
+Trip Distance Standard Deviation (Feet): 2978.9245690711678
+Standard Deviation Range (Feet) = +/-2 St. Dev. from Mean
+Standard Deviation Range (Feet) = [-3277.2557581201677, 8638.442518164504]
+Data Description
+count    566588.000000
+mean       2680.593380
+std        2978.924569
+min           1.000000
+25%         939.000000
+50%        1902.000000
+75%        3500.000000
+max       49997.000000
+Name: Trip Distance, dtype: float64
+Median Trip Distance (Feet): 1902.0
+Median Trip Distance (Miles): 0.36022727272727273
+```
+Once again, we find ourselves with an inopportune standard deviation range.  In this case, we can't travel negative distances, and our maximum distance of nearly 50,000 feet, or 9.5 miles, is far greater than the median distance to travel with a scooter 0.36 miles.
+As we did before with duration values, we'll find an appropriate percentile range for our data and remove rows that are not in that range.
+```
+# Get 10th and 90th Percentile Values
+distance_10th_percentile = np.percentile(df["Trip Distance"], 10)
+distance_90th_percentile = np.percentile(df["Trip Distance"], 90)
+print(f"10th Percentile Distance (Feet): {distance_10th_percentile}")
+print(f"10th Percentile Distance (Miles): {distance_10th_percentile/5280}")
+
+
+current_row_total = df.size/total_columns
+print(f"Current Working Row Count: {current_row_total}")
+
+df_distance_10th_percentile = df[df["Trip Distance"] < distance_10th_percentile].index
+df.drop(df_distance_10th_percentile, inplace=True)
+short_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Short Distances: {short_trip_row_total}")
+print(f"Total Short Distance Rows Removed: {current_row_total - short_trip_row_total}")
+
+df_distance_90th_percentile = df[df["Trip Distance"] > distance_90th_percentile].index
+df.drop(df_distance_90th_percentile, inplace=True)
+long_trip_row_total = df.size/total_columns
+print(f"Rows After Removing Long Distances: {long_trip_row_total}")
+print(f"Total Long Distance Rows Removed: {current_row_total - long_trip_row_total}")
+```
+```
+10th Percentile Distance (Feet): 210.0
+10th Percentile Distance (Miles): 0.03977272727272727
+Current Working Row Count: 566588.0
+Rows After Removing Short Distances: 509980.0
+Total Short Distance Rows Removed: 56608.0
+Rows After Removing Long Distances: 453333.0
+Total Long Distance Rows Removed: 113255.0
+```
+Finally, we're now left with 453,333 rows, all of which have complete data and have data within our acceptable ranges for Trip Duration and Trip Distance.
+
+
+#### Step 6: Convert Date Datatypes
+Our next step is to convert our Date entry data types to something more usable.  The Start Time and End Time values in the working dataset are in plain text/string format.  We need to convert these to a more standardized date format so that they can be used for analysis.  Luckily, this is takes only a few lines of code with our chosen libraries.
+```
+# Convert Data Types
+df['Start Time'].apply(pd.to_datetime)
+df['End Time'].apply(pd.to_datetime)
+```
+Converting these datetimes allows us to use these converted values later on for our use cases.
+
+#### Step 7: Export D' for U1
+Now that our dataset is cleaned, we can export it.  This speeds up our work later on, as the data conversion in Step 5 is time consuming and we would like to avoid repeating it.
+```
+df.to_csv('~/Desktop/output.csv', index=False, header=True)
+```
+
+Below is a workflow diagram to illustrate the process that was just performed to clean the data.
+
+<p align="center">
+ <img src=img/flow1.png/>
+    <br>
+    <em><b>Figure 1:</b> Workflow Diagram of Data Cleaning</em>
+</p>
+
+
+## Target Use Case: U<sub>1</sub>
+Once again, our target use case is to determine optimal locations for new bike lanes in Chicago with the intention of promoting reducing vehicle traffic by making alternative means of transportation more available.  The steps to do this are listed below:
+> Step 1: Import Cleaned Dataset D' and Required Libraries
+>
+> Step 2: Discover High Demand Scooter Times
+> 
+> Step 3: Create Heat Maps of Scooter Trip Locations at High Demand Times
+>
+> Step 4: Use Heat Maps to Determine New Bike Lane Locations
+
+#### Step 1: Import Cleaned Dataset D' and Required Libraries
+As with before, this step is fairly straightforward.  We simply import the clean data set that was exported in our earlier data cleaning process and the new required libraries. 
+```
+import folium
+from folium import plugins
+from folium.plugins import HeatMap
+
+import pandas as pd
+
+df = pd.read_csv('~/Desktop/output.csv')
+total_columns = len(df.columns)
+```
+Here, we're importing the [Folium](http://python-visualization.github.io/folium/) library to generate our heatmaps later on.
+
+
+#### Step 2: Discover High Demand Scooter Times
+The first thing that we'll do here is take our dataset D' and partition it twice.  The first partition, dfs_by_hour_start will partition the data based on the start time of the trip, and the second, dfs_by_hour_end, will partition the data based on the end time of the trip.
+```
+# Separate DF by Start Time Hour
+print(f"Calculating Start Times")
+hour_starts = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_start = [df[df["Start Time"].str.contains(hour)] for hour in hour_starts]
+
+print(f"Sample of Entries with Start Time at 12AM:")
+print(dfs_by_hour_start[0]["Start Time"].head())
+
+print(f"Sample of Entries with STart Time at 4:00PM")
+print(dfs_by_hour_start[16]["Start Time"].head())
+
+
+# Separate DF by End Time Hour
+print(f"\n\nCalculating End Times")
+hour_ends = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_end = [df[df["End Time"].str.contains(hour)] for hour in hour_ends]
+
+print(f"Sample of Entries with End Time at 12AM:")
+print(dfs_by_hour_end[0]["End Time"].head())
+
+print(f"Sample of Entries with End Time at 4:00PM")
+print(dfs_by_hour_end[16]["End Time"].head())
+```
+```
+Calculating Start Times
+Sample of Entries with Start Time at 12AM:
+50794    8/25/20 0:00
+50795    8/25/20 0:00
+88803    8/31/20 0:00
+93988     9/1/20 0:00
+93989     9/1/20 0:00
+Name: Start Time, dtype: object
+Sample of Entries with STart Time at 4:00PM
+661    8/12/20 16:00
+662    8/12/20 16:00
+663    8/12/20 16:00
+664    8/12/20 16:00
+665    8/12/20 16:00
+Name: Start Time, dtype: object
+
+
+Calculating End Times
+Sample of Entries with End Time at 12AM:
+50794    8/25/20 0:00
+50795    8/25/20 0:00
+88803    8/31/20 0:00
+93987     9/1/20 0:00
+93988     9/1/20 0:00
+Name: End Time, dtype: object
+Sample of Entries with End Time at 4:00PM
+555    8/12/20 16:00
+581    8/12/20 16:00
+584    8/12/20 16:00
+591    8/12/20 16:00
+598    8/12/20 16:00
+Name: End Time, dtype: object
+```
+
+Now, we'll take these partitioned dataframes to determine how many entries there are per hour.
+```
+# Get Total Rows/Hour
+trips_per_hour_start = [hour.size/total_columns for hour in dfs_by_hour_start]
+
+print(f'Calculating End Times')
+dfs_by_hour_end = [df[df['End Time'].str.contains(hour)] for hour in hour_starts]
+
+for hour in dfs_by_hour_end:
+    print(hour['End Time'].head())
+
+# Get Total Rows/Hour
+trips_per_hour_end = [hour.size/total_columns for hour in dfs_by_hour_end]
+
+print(f'Trips per Hour Start: ')
+for i in range(len(trips_per_hour_start)):
+    print(f'Hour {i}: {trips_per_hour_start[i]}')
+
+print(f'\n\nTrips per Hour End: ')
+for i in range(len(trips_per_hour_end)):
+    print(f'Hour {i}: {trips_per_hour_end[i]}')
+```
+```
+Trips per Hour Start: 
+Hour 0: 14.0
+Hour 1: 8.0
+Hour 2: 1.0
+Hour 3: 18.0
+Hour 4: 9.0
+Hour 5: 2420.0
+Hour 6: 4851.0
+Hour 7: 7977.0
+Hour 8: 11478.0
+Hour 9: 13552.0
+Hour 10: 17965.0
+Hour 11: 24095.0
+Hour 12: 29691.0
+Hour 13: 31807.0
+Hour 14: 34327.0
+Hour 15: 39004.0
+Hour 16: 42860.0
+Hour 17: 47896.0
+Hour 18: 47740.0
+Hour 19: 40485.0
+Hour 20: 31848.0
+Hour 21: 25075.0
+Hour 22: 185.0
+Hour 23: 27.0
+
+
+Trips per Hour End: 
+Hour 0: 17.0
+Hour 1: 7.0
+Hour 2: 2.0
+Hour 3: 18.0
+Hour 4: 7.0
+Hour 5: 2032.0
+Hour 6: 4369.0
+Hour 7: 7576.0
+Hour 8: 10861.0
+Hour 9: 12914.0
+Hour 10: 17024.0
+Hour 11: 22649.0
+Hour 12: 28858.0
+Hour 13: 31328.0
+Hour 14: 33446.0
+Hour 15: 38092.0
+Hour 16: 41945.0
+Hour 17: 47139.0
+Hour 18: 48060.0
+Hour 19: 42213.0
+Hour 20: 33211.0
+Hour 21: 26438.0
+Hour 22: 5096.0
+Hour 23: 31.0
+```
+
+Copying and pasting these values into excel, we're able to create Figure 2, which helps to visualize scooter demand each hour.
+
+<p align="center">
+ <img src=img/chart1.png/>
+    <br>
+    <em><b>Figure 2:</b> Scooter Trips by Hour Start and End (Cleaned Data)</em>
+</p>
+
+As you can see in Figure 2, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM. Because the peaks are so similar, we'll use the Start Time values for creating our heat maps in Step 3.
+We can also see in this chart that the early and late hours in the day have very few entries in comparison to the peak times.  This is because the scooters are charged every night and less people are out.
+
+
+#### Step 3: Create Heat Maps of Scooter Trip Locations at High Demand Times
+Our next step is to make heatmaps for the high demand times that the scooters are in use.  We'll do this using the folium library, which was imported in Step 1.  These heatmaps will be exported as html files.
+
+```
+# Make Heat Maps
+df_16 = df[df['Start Time'].str.contains('16:00')]
+df_17 = df[df['Start Time'].str.contains('17:00')]
+df_18 = df[df['Start Time'].str.contains('18:00')]
+df_19 = df[df['Start Time'].str.contains('19:00')]
+
+
+my_heatmap_16 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_16 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_16.iterrows()]
+HeatMap(heat_data_start_16, blur=30, radiues=10).add_to(my_heatmap_16)
+my_heatmap_16.save("1600.html")
+
+my_heatmap_17 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_17 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_17.iterrows()]
+HeatMap(heat_data_start_17, blur=30, radiues=10).add_to(my_heatmap_17)
+my_heatmap_17.save("1700.html")
+
+my_heatmap_18 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_18 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_18.iterrows()]
+HeatMap(heat_data_start_18, blur=30, radiues=10).add_to(my_heatmap_18)
+my_heatmap_18.save("1800.html")
+
+my_heatmap_19 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_19 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_19.iterrows()]
+HeatMap(heat_data_start_19, blur=30, radiues=10).add_to(my_heatmap_19)
+my_heatmap_19.save("1900.jpg")
+```
+The resulting heatmaps are nearly identical and shown below.
+
+<p align="center">
+ <img src=img/1600.png/>
+    <br>
+    <em><b>Image 2:</b> Heat Map of Scooters with Start Time == 16:00 Hours</em>
+</p>
+
+<p align="center">
+ <img src=img/1700.png/>
+    <br>
+    <em><b>Image 3:</b> Heat Map of Scooters with Start Time == 17:00 Hours</em>
+</p>
+
+<p align="center">
+ <img src=img/1800.png/>
+    <br>
+    <em><b>Image 4:</b> Heat Map of Scooters with Start Time == 18:00 Hours</em>
+</p>
+
+<p align="center">
+ <img src=img/1900.png/>
+    <br>
+    <em><b>Image 5:</b> Heat Map of Scooters with Start Time == 19:00 Hours</em>
+</p>
+
+Included as a reference is the heatmap for 4:00AM
+```
+df_4 = df[df['Start Time'].str.contains(' 4:00')]
+my_heatmap_4 = folium.Map([41.8781, -87.6298], zoom_start=11)
+heat_data_start_4 = [[row['Start Centroid Latitude'],row['Start Centroid Longitude']] for index, row in df_4.iterrows()]
+HeatMap(heat_data_start_4, blur=30, radiues=10).add_to(my_heatmap_4)
+my_heatmap_4.save("400.html")
+```
+
+<p align="center">
+ <img src=img/400.png/>
+    <br>
+    <em><b>Image 6:</b> Heat Map of Scooters with Start Time == 04:00 Hours</em>
+</p>
+
+Our work here is now complete and we can move on to the next step.
+
+#### Step 4: Use Heat Maps to Determine New Bike Lane Locations
+The final step in finding our optimal bike lane locations is to reference our heat maps from the busiest hour times.  Since each of the four busiest hour times had such similar results, we'll arbitrarily select the heatmap from 17:00.
+
+<p align="center">
+ <img src=img/heat_map_sections.png/>
+    <br>
+    <em><b>Image 7:</b> High Traffic Electric Scooter Areas at 17:00 Hours</em>
+</p>
+
+Shown in Image 7, the three areas with the most electric scooter demand are circled and labelled as A, B, and C.  These neighborhoods are Lakeview, Bronzeville, and Chatham/Avalon Park, respectively.  After cleaning and analysis, I would recommend that the city of Chicago prioritize these neighborhoods for new dedicated bike lines.
+
+
+## Secondary Use Case: U<sub>2</sub>
+Our secondary use case, <i>U<sub>2</sub></i>, was to determine which times of the day have the highest demand and therefore earning potential for electric scooters.  This use case is one where data cleaning is not necessary, and it's purpose would be to find the optimal times for these vendors to use surge pricing in order to increase profits.
+
+We already did this work earlier as a step for our primary use case, but I'm going to demonstrate that for this standalone secondary use case, cleaning isn't necessary.
+
+Similar to before, we'll load the data and partition it by the hour.  This time around, however, we will load the raw data and will not be eliminating any rows beforehand.
+```
+import pandas as pd
+
+df = pd.read_csv("~/Downloads/e-scooter-trips-2020-1.csv")
+total_columns = len(df.columns)
+
+# Separate DF by Start Time Hour
+print(f"Calculating Start Times")
+hour_starts = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_start = [df[df["Start Time"].str.contains(hour)] for hour in hour_starts]
+
+print(f"Sample of Entries with Start Time at 12AM:")
+print(dfs_by_hour_start[0]["Start Time"].head())
+
+print(f"Sample of Entries with STart Time at 4:00PM")
+print(dfs_by_hour_start[16]["Start Time"].head())
+
+
+# Separate DF by End Time Hour
+print(f"\n\nCalculating End Times")
+hour_ends = [f" {i}:00"[-5:] for i in range(24)]
+dfs_by_hour_end = [df[df["End Time"].str.contains(hour)] for hour in hour_ends]
+
+print(f"Sample of Entries with End Time at 12AM:")
+print(dfs_by_hour_end[0]["End Time"].head())
+
+print(f"Sample of Entries with End Time at 4:00PM")
+print(dfs_by_hour_end[16]["End Time"].head())
+
+
+# Get Total Rows/Hour
+trips_per_hour_start = [hour.size/total_columns for hour in dfs_by_hour_start]
+
+# Get Total Rows/Hour
+trips_per_hour_end = [hour.size/total_columns for hour in dfs_by_hour_end]
+
+print(f'\n\nTrips per Hour Start: ')
+for i in range(len(trips_per_hour_start)):
+    print(f'Hour {i}: {trips_per_hour_start[i]}')
+
+print(f'\n\nTrips per Hour End: ')
+for i in range(len(trips_per_hour_end)):
+    print(f'Hour {i}: {trips_per_hour_end[i]}')
+```
+```
+Calculating Start Times
+Sample of Entries with Start Time at 12AM:
+82416     8/25/20 0:00
+82417     8/25/20 0:00
+138078    8/31/20 0:00
+145639     9/1/20 0:00
+145640     9/1/20 0:00
+Name: Start Time, dtype: object
+Sample of Entries with STart Time at 4:00PM
+1144    8/12/20 16:00
+1145    8/12/20 16:00
+1146    8/12/20 16:00
+1147    8/12/20 16:00
+1148    8/12/20 16:00
+Name: Start Time, dtype: object
+
+
+Calculating End Times
+Sample of Entries with End Time at 12AM:
+3454     8/13/20 0:00
+38412    8/19/20 0:00
+44489    8/20/20 0:00
+44500    8/20/20 0:00
+44501    8/20/20 0:00
+Name: End Time, dtype: object
+Sample of Entries with End Time at 4:00PM
+587    8/12/20 16:00
+631    8/12/20 16:00
+649    8/12/20 16:00
+763    8/12/20 16:00
+765    8/12/20 16:00
+Name: End Time, dtype: object
+
+
+Trips per Hour Start: 
+Hour 0: 17.0
+Hour 1: 12.0
+Hour 2: 7.0
+Hour 3: 39.0
+Hour 4: 21.0
+Hour 5: 3201.0
+Hour 6: 6271.0
+Hour 7: 10153.0
+Hour 8: 14597.0
+Hour 9: 17649.0
+Hour 10: 23626.0
+Hour 11: 31971.0
+Hour 12: 39673.0
+Hour 13: 43585.0
+Hour 14: 48099.0
+Hour 15: 55324.0
+Hour 16: 61115.0
+Hour 17: 67605.0
+Hour 18: 67568.0
+Hour 19: 58006.0
+Hour 20: 45999.0
+Hour 21: 35939.0
+Hour 22: 299.0
+Hour 23: 40.0
+
+
+Trips per Hour End: 
+Hour 0:  152.0
+Hour 1:  12.0
+Hour 2:  14.0
+Hour 3:  29.0
+Hour 4:  23.0
+Hour 5:  2564.0
+Hour 6:  5653.0
+Hour 7:  9511.0
+Hour 8:  13726.0
+Hour 9:  16522.0
+Hour 10: 21971.0
+Hour 11: 29433.0
+Hour 12: 37920.0
+Hour 13: 42075.0
+Hour 14: 46062.0
+Hour 15: 53006.0
+Hour 16: 58919.0
+Hour 17: 66280.0
+Hour 18: 67786.0
+Hour 19: 60527.0
+Hour 20: 48916.0
+Hour 21: 39224.0
+Hour 22: 9728.0
+Hour 23: 763.0
+```
+Once again, we create a chart of these values.
+
+<p align="center">
+ <img src=img/chart2.png/>
+    <br>
+    <em><b>Figure 3:</b> Scooter Trips by Hour Start and End (Raw Data)</em>
+</p>
+
+And, once again, we see in Figure 3 that the most popular hours to ride a scooter are between 16:00 and 19:00, just as it was before the data cleaning step.  Vendors should therefore considering increasing their prices during these hours if they would like to maximize their profits.
+While data cleaning was not necessary here, it's still always a very important step when trying to produce accurate results.  
+
+## Secondary Use Case: U<sub>3</sub>
+Our next secondary use case, <i>U<sub>3</sub></i>, where data cleaning id not sufficient, is to determine how many rides it takes for the e-scooters to start turning a profit for their vendors.  The reason that data cleaning is insufficient for our target use case here is because the data is lacking certain required information.  We do not know how many times these scooters were prepared, how much each ride cost, or how many scooters were stolen/missing at the end of the pilot program.  With that being said, we can still use our clean data set, D', and some outside information to attempt to come up an answer.
+
+The first step is to determine what the price model is for each of the three companies in the 2020 pilot program: Bird, Lime, and Spin.  In Chicago, Bird, Lime, and Spin are all currently charging $1.00 to unlock the scooter and $0.39/minute of riding + tax.  The next step is to determine how much a scooter costs to produce.  We can use this [scooter](https://www.walmart.com/ip/Bird-ES4-800-Electric-Scooter-Dual-Battery-28-mile-Range-800-Watt-Motor-Ground-Effect-Lights-Front-Shock-Absorption-15-5-MPH-Ultra-Lightweight-Scoote/820461710?wmlspartner=wlpa&selectedSellerId=101015394&&adid=22222222227387731326&wl0=&wl1=g&wl2=c&wl3=513758874174&wl4=pla-1015545166774&wl5=9028771&wl6=&wl7=&wl8=&wl9=pla&wl10=157246008&wl11=online&wl12=820461710&veh=sem&gclid=EAIaIQobChMIkKyT3P-f8gIVNhmtBh3qjAZFEAQYAyABEgJULvD_BwE&gclsrc=aw.ds) from Walmart, priced at $449, as a conservatively high estimate for this cost.  Lastly, we need to keep in mind how much these vendors need to pay third party workers to charge their scooters.  This price comes out to ~$5/day.
+
+Once again, we load our cleaned data to determine and find the median time for each ride.
+```
+import pandas as pd
+
+df = pd.read_csv("~/Desktop/output.csv")
+total_columns = len(df.columns)
+
+print(f"\nMedian Trip Length (Seconds): {df['Trip Duration'].median()}")
+print(f"Median Trip Length (Minutes): {df['Trip Duration'].median()/60}")
+```
+```
+Median Trip Length (Seconds): 549.0
+Median Trip Length (Minutes): 9.15
+```
+Our median trip duration is 9.15 minutes.  Using the startup cost of $449, our median duration of 9.15 minutes, and the pricing model of $1 to unlock + $0.39/minute, and assuming that each scooter is used just 10 times a day, we can use the following formula to determine (roughly) how many trips each scooter needs:
+```
+scooter_price = 449
+median_minutes = df['Trip Duration'].median()/60
+
+remaining_investment = scooter_price
+
+total_trips_until_profit = 0
+times_used_daily = 0
+while remaining_investment > 0:
+    total_trips_until_profit += 1
+    if times_used_daily % 10 == 0:
+        remaining_investment += 5
+    remaining_investment -=  (1 + 0.39*median_minutes)
+    times_used_daily += 1
+
+print(f"Total Trips Until Profit: {total_trips_until_profit}")
+```
+```
+Total Trips Until Profit: 112
+```
+Thus, we can roughly estimate with our limited data and outside sources that it will take 112 trips for Bird, Lime, and Spin to profit off of each scooter in Chicago.  Once again, we're missing important data related to administrative and overhead cost, taxes owed to the city, lobbying costs to allow the use of scooters on public spaces, etc.
+
+Our answer to this use case is nowhere close to complete without knowing the additional costs or varying price models from subscription services for these scooters.  Therefore, even with the data that we have, we will never be able to tell how many trips each scooter needs to take to turn a profit with this data alone.
+
+
+## Conclusion
+In conclusion, as a result of the data cleaning and analysis of the 2020 E-Scooter Pilot Program in Chicago, Illinois, I would recommend that future dedicated bike lane infrastructure projects be priorized in the Lakeview, Bronzeville, and Chatham/Avalon Park neighborhoods to better suit the needs of the Chicagoans living there.
