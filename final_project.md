@@ -337,3 +337,19 @@ Rows After Removing Long Distances: 453333.0
 Total Long Distance Rows Removed: 113255.0
 ```
 Finally, we're now left with 453,333 rows, all of which have complete data and have data within our acceptable ranges for Trip Duration and Trip Distance.
+
+
+#### Step 5: Convert Date Datatypes
+Our next step is to convert our Date entry data types to something more usable.  The Start Time and End Time values in the working dataset are in plain text/string format.  We need to convert these to a more standardized date format so that they can be used for analysis.  Luckily, this is takes only a few lines of code with our chosen libraries.
+```
+# Convert Data Types
+df['Start Time'].apply(pd.to_datetime)
+df['End Time'].apply(pd.to_datetime)
+```
+Converting these datetimes allows us to use these converted values later on for our use cases.
+
+#### Step 6: Export D' for U1
+Now that our dataset is cleaned, we can export it.  This speeds up our work later on, as the data conversion in Step 5 is time consuming and we would like to avoid repeating it.
+```
+df.to_csv('~/Desktop/output.csv', index=False, header=True)
+```
