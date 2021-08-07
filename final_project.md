@@ -530,3 +530,6 @@ Copying and pasting these values into excel, we're able to create Figure 1, whic
     <br>
     <em><b>Figure 1:</b> Scooter Trips by Hour Start and End</em>
 </p>
+
+As you can see in Figure 1, the start and end time lines are very similar.  It makes sense that the orange "End Time" chart line is shifted the slightest bit to the right, because the end times (with rounding) must be equal to or greater than the start times. The shift is very small because our median time for this data set is only a few minutes.  Altogether, this chart shows us that the peak times for commuting on scooters are between 16:00 and 19:00, or 4:00PM and 7:00PM.
+We can also see in this chart that the early and late hours in the day have very few entries in comparison to the peak times.  This is because the scooters are charged every night and less people are out.
