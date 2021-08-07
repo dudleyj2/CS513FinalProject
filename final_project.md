@@ -79,14 +79,14 @@ Total NA Rows Removed: 1641.0
 Right off the bat, we're removing 1,641 rows from our dataset.  Now that these rows have been removed, let's peek at some important fields of the data to get an idea of important statistical values associated with them, like mean, median, and percentile ranges.
 
 ```
-print(f'\nTrip Duration Statistics')
+print(f'\nTrip Duration Statistics (Seconds)')
 print(df['Trip Duration'].describe())
 
-print(f'\nTrip Distance Statistics')
+print(f'\nTrip Distance Statistics (Feet)')
 print(df['Trip Distance'].describe())
 ```
 ```
-Trip Duration Statistics
+Trip Duration Statistics (Seconds)
 count    629175.000000
 mean        993.401151
 std        1352.792422
@@ -97,7 +97,7 @@ min           0.000000
 max      204182.000000
 Name: Trip Duration, dtype: float64
 
-Trip Distance Statistics
+Trip Distance Statistics (Feet)
 count    629175.000000
 mean       2905.926094
 std        3707.496669
@@ -108,3 +108,9 @@ min           1.000000
 max       49997.000000
 Name: Trip Distance, dtype: float64
 ```
+
+As seen in the code output above, we have a wide range of distances and durations, some of which are unreasonable to include in our analysis.  The maximum trip duration, for example, is over 204,000 seconds, or 56 hours and 40 minutes.  This, and an assortment of other entries in our data set are likely due to user error, where the scooter rider forgot to lock the scooter and end their trip.  The minimum duration of 0 seconds isn't long enough to move at all.
+
+Looking at the trip distance statistices, the maximum trip distance, is almost 50,000 feet, or nearly 10 miles. It's also over 13 times the 75th percentile distance of just 3,641 feet, or 0.69 miles. Comparatively, the minimum distance is just 1 foot - much too small to be a legitimate commute.
+
+Needless to say, there are plenty of rows with outlier data that we should remove in order to create <i>D'</i>, our cleaned data set.
